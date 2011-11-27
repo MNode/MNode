@@ -299,7 +299,7 @@ void network_start( void (*mesh_parser_link)(unsigned char *, unsigned int) )
 
     if (network_init())
     {
-        printf(MODULE_NAME "Network setup failed\n");
+        printf(MODULE_NAME "Network setup failed, operating in write-only mode\n");
         return;
     }
 
