@@ -74,7 +74,7 @@ node_entry *node_list = NULL;
 
 
 /* Add node to list */
-void network_add_node(unsigned int tx_node_id)
+int network_add_node(unsigned int tx_node_id)
 {
     node_entry *tmp = node_list;
 
@@ -83,7 +83,7 @@ void network_add_node(unsigned int tx_node_id)
     while (tmp)
     {
         if (tmp->node_id == tx_node_id)
-            return;
+            return 1;
     
         tmp = tmp-> next;
     }
@@ -93,6 +93,9 @@ void network_add_node(unsigned int tx_node_id)
     tmp->next = node_list;
     tmp->node_id = tx_node_id;
     node_list = tmp;
+    
+    return 0;
+    
 }
 /* End of network_add_node */
 
@@ -157,19 +160,24 @@ void network_ident (void )
 
 unsigned char buffer[100];
 
-    unsigned int length = 6;
+    unsigned int length = TX_DATA_OFS;
 
-    buffer[0] = length >> 8;
-    buffer[1] = length &  0xff;
-
-    buffer[2] = node_id >> 8;
-    buffer[3] = node_id &  0xff;
-
-    buffer[4] = ID_IDENT;
-    buffer[5] = 0;  // No checksum for now
+    unsigned int i = 0;
     
-    buffer[5] = get_checksum(buffer, length);
+    buffer[i++] = length >> 8;
+    buffer[i++] = length &  0xff;
 
+    buffer[i++] = node_id >> 8;
+    buffer[i++] = node_id &  0xff;
+
+    buffer[i++] = 0;//node_id >> 8;
+    buffer[i++] = 0;//node_id &  0xff;
+
+
+    buffer[i++] = ID_IDENT;
+    buffer[i++] = 0;  // No checksum for now
+    
+    buffer[TX_DATA_OFS-1] = get_checksum(buffer, length);
    
     network_send(buffer, length);
 
@@ -180,24 +188,30 @@ unsigned char buffer[100];
 void network_string (unsigned char *s )
 {
     unsigned char buffer[256];
+    unsigned int length = strlen((char *)s) + TX_DATA_OFS;
 
-    unsigned int length = strlen((char *)s) + 6;
+    unsigned int target_node_id = 0;
 
-    buffer[0] = length >> 8;
-    buffer[1] = length &  0xff;
+    unsigned int i = 0;
 
-    buffer[2] = node_id >> 8;
-    buffer[3] = node_id &  0xff;
+    buffer[i++] = length >> 8;
+    buffer[i++] = length &  0xff;
 
-    buffer[4] = ID_STRING;
-    buffer[5] = 0; // No checksum for now
+    buffer[i++] = node_id >> 8;
+    buffer[i++] = node_id &  0xff;
+    
+    buffer[i++] = target_node_id >> 8;
+    buffer[i++] = target_node_id &  0xff;
+        
+    buffer[i++] = ID_STRING;
+    buffer[i++] = 0; // No checksum for now
    
-    strcpy((char*)(buffer + 6), (char *)s);
+    strcpy((char*)(buffer + TX_DATA_OFS), (char *)s);
    
     buffer[length] = 0;
       
     // COmpute checksum  
-    buffer[5] = get_checksum(buffer, length); 
+    buffer[TX_DATA_OFS-1] = get_checksum(buffer, length); 
                  
     network_send(buffer, length);
 }
@@ -257,11 +271,17 @@ int network_send(unsigned char *data, unsigned int length)
 /* Core network thread */
 void *network_thread( void *threadid )
 {
-    printf(MODULE_NAME "Network Thread - Started\n");
-    
+ 
     unsigned char  buf[BUFLEN];
 
     socklen_t      slen=sizeof(si_remote);
+
+    unsigned int time_count = 0;
+
+    
+    
+    printf(MODULE_NAME "Network Thread - Started\n");
+    
     
     while(network_running)
     {
@@ -294,6 +314,14 @@ void *network_thread( void *threadid )
         }
         else
         {
+            time_count++;
+        
+            if (time_count == 10)
+            {
+                time_count = 0;
+                network_ident();            // Set out  keep alive
+            }
+                
             // Timeout ?
         }   
         

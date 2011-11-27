@@ -66,9 +66,11 @@ void mesh_packet(unsigned char *data, unsigned int length)
 {
     unsigned int i;
     unsigned int tx_length   = get_word(data);//data[0]*256+data[1];
-    unsigned int tx_node_id     = get_word(data+2);//data[2]*256+data[3];
-    unsigned int tx_type     = data[4];
-    unsigned int tx_checksum = data[5];
+    unsigned int tx_src_node_id     = get_word(data+2);//data[2]*256+data[3];
+    unsigned int tx_tar_node_id     = get_word(data+4);//data[2]*256+data[3];
+    
+    unsigned int tx_type     = data[6];
+    unsigned int tx_checksum = data[7];
 
 
 /*    printf("\nMesh packet\n");
@@ -80,17 +82,15 @@ void mesh_packet(unsigned char *data, unsigned int length)
     
     if (tx_type == ID_IDENT)
     {
-        
-        network_add_node(tx_node_id);       // Add to node list
-
-
-        printf("[Node %d] IDENT\n", tx_node_id);
+        if (network_add_node(tx_src_node_id) == 0)       // Add to node list
+            printf("[Node %d->%d] IDENT\n", tx_src_node_id, tx_tar_node_id ); // display if new
+            
     } else
     if (tx_type == ID_STRING)
     {
    
     
-        printf("[Node %d] STRING: ", tx_node_id);
+        printf("[Node %d->%d] STRING: ", tx_src_node_id, tx_tar_node_id );
         
         for (i = 0; i < tx_length-6; i++)
             printf("%c", data[i+TX_DATA_OFS]);
@@ -101,7 +101,7 @@ void mesh_packet(unsigned char *data, unsigned int length)
     } else
     {
     
-        printf("Unknown packet type from %d\n", tx_node_id);
+        printf("Unknown packet type from %d->%d\n", tx_src_node_id, tx_tar_node_id );
     
     }
     

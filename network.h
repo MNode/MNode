@@ -37,13 +37,12 @@ int network_send(unsigned char *data, unsigned int length);
 void network_ident (void );
 void network_string (unsigned char *s );
 
-
-void network_add_node(unsigned int node_id);
+int network_add_node(unsigned int tx_node_id);
 void network_list_nodes( void );
 void network_free_nodes( void );
 
 
-#define TX_DATA_OFS 6
+#define TX_DATA_OFS 8       // Packet header size
 
 
 #define ID_IDENT   1
@@ -53,4 +52,11 @@ void network_free_nodes( void );
 
 
 #endif
+
+
+
+
+
+
+
 
