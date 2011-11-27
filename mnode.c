@@ -47,9 +47,7 @@ unsigned int rx_len = 0;
 
 
 
-
-
-
+/* Return a word from inside a buffer */
 unsigned int get_word(unsigned char * b)
 {
     return (*b << 8) + *(b+1);
