@@ -6,16 +6,18 @@ CFLAGS=-O4 -Wall
 LIBS=-l pthread
 EXE=mnode
 
-mnode:	mnode.o network.o
-	$(CC)	mnode.o network.o -o $(EXE) $(LIBS)
+mnode:	mnode.o datatap.o network.o 
+	$(CC)	mnode.o datatap.o network.o -o $(EXE) $(LIBS)
 
-	
-mnode.o:	mnode.c  mnode.h
+mnode.o:	mnode.c  mnode.h network.h
 	$(CC)	-c mnode.c -o mnode.o $(CFLAGS)
 
+datatap.o:	datatap.c  datatap.h network.h
+	$(CC)	-c datatap.c -o datatap.o $(CFLAGS)
 
 network.o:	network.c  network.h
 	$(CC)	-c network.c -o network.o $(CFLAGS)
+
 
 .PHONY: clean
 clean:
