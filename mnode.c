@@ -173,5 +173,27 @@ int mnode_stop(void)
 
  
 
+/* Start node */
+int mnode_tap_add(char *name, unsigned int tap_type, void * tap_link)
+{
+     // Add system taps
+  
+    data_tap_add(name, tap_type, tap_link);
+ 
+    return MN_SUCCESS;
+}
+/* End of mnode_start */
+
+
+
+
+
+
+
+
+
+
+
+
 
  

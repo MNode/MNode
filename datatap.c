@@ -55,18 +55,7 @@ void data_tap_add(char *name, unsigned int tap_type, void * tap_link)
     
 //    network_datatap_data (&t1);
    
-
 }
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -75,27 +64,15 @@ void datatap_poll( void )
 {
     datatap_type *tmp = data_taps;
 
+    // Iterate through taps and send to network
     while(tmp)
     {
         network_datatap_data (tmp);
         tmp = tmp->next;
-    }
-
-
-/*    struct sysinfo si;
-    sysinfo(&si);
-  
-    strcpy(t1.tap_name,"freeram");
-    t1.tap_type = DT_INT32;
-    t1.tap_value = si.freeram;
-    network_datatap_data (&t1);
-    
-    strcpy(t1.tap_name,"processes");
-    t1.tap_type = DT_INT32;
-    t1.tap_value = si.procs;
-    network_datatap_data (&t1);   */
-    
+    }   
 }
+/* End of datatap_poll */
+
 
 
 

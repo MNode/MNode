@@ -41,7 +41,8 @@
 
 int mnode_start(void);
 int mnode_stop(void);
- 
+
+int mnode_tap_add(char *name, unsigned int tap_type, void * tap_link);
 
 #endif
 

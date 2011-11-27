@@ -114,6 +114,7 @@ int main ( void )
     char  *s;
     size_t len = 0;
     int    b;
+    int count = 0;
 
     printf(MODULE_NAME "Startup\n");
 
@@ -121,6 +122,12 @@ int main ( void )
 
 
     mnode_start();
+
+
+
+    mnode_tap_add("count", DT_INT32, &count);
+
+
 
 
        
@@ -144,7 +151,10 @@ int main ( void )
         printf("Message: ");
          b = getline(&s, &len, stdin);
         command_string(s);
+        
         }
+
+        count++;
 
     }
     
