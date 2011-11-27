@@ -2,7 +2,7 @@
     Mesh Protocol Test 
         (C) 2012 
             Jason Hunt (nulluser@gmail.com)
-            Ling
+            Robin Stamer (genoce@gmail.com)
                
     
     This program is free software; you can redistribute it and/or
@@ -20,7 +20,7 @@
     Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
     Contact:    nulluser@gmail.com
-                Ling
+                genoce@gmail.com
 
     File: network.c
 */
@@ -32,6 +32,7 @@
 #include <stdlib.h>
 #include <memory.h>
 #include <errno.h>
+#include <unistd.h>
 #include <arpa/inet.h>
 
 
@@ -187,9 +188,9 @@ void *network_thread( void *threadid )
 {
     printf(MODULE_NAME "Network Thread - Started\n");
     
-    char buf[BUFLEN];
+    unsigned char  buf[BUFLEN];
 
-    int  slen=sizeof(si_remote);
+    socklen_t      slen=sizeof(si_remote);
     
     while(network_running)
     {

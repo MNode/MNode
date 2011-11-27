@@ -33,6 +33,7 @@ int network_init( void );
 void network_start( void (*mesh_parser_link)(unsigned char *, unsigned int) );
 
 void network_stop( void );
+void network_ident( void );
 
 
 int network_send(unsigned char *data, unsigned int length);
