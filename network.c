@@ -204,18 +204,39 @@ void *network_thread( void *threadid )
     
     while(network_running)
     {
-        int ret = recvfrom(server_sd, (char *)buf, BUFLEN, 0, (struct sockaddr *)&si_remote, &slen);
-       
-        if (ret ==-1)
+    
+        struct timeval tval;
+
+        fd_set readfds;
+
+        tval.tv_sec = 1;
+        tval.tv_usec = 0;
+    
+        FD_ZERO(&readfds);
+        FD_SET(server_sd, &readfds);
+
+
+        select(server_sd+1, &readfds, NULL, NULL, &tval);
+
+        if (FD_ISSET(server_sd, &readfds))
         {
-            printf("recvfrom fail");
-            continue;
-            
-        }
+            int ret = recvfrom(server_sd, (char *)buf, BUFLEN, 0, (struct sockaddr *)&si_remote, &slen);
+           
+            if (ret ==-1)
+            {
+               printf("recvfrom fail");
+                continue;
+            }
        
-        mesh_parser(buf, ret);
+            mesh_parser(buf, ret);
+
+        }
+        else
+        {
+            // Timeout ?
+        }   
         
-/*                        
+        /*                        
         printf("Data from: %s:%d\n", inet_ntoa(si_remote.sin_addr),
                                     ntohs(si_remote.sin_port));
                                    
@@ -265,6 +286,15 @@ int network_init( void )
         return 1;
     }
     
+    
+    
+/*    int sock = socket(...);
+int flags = fcntl(sock, F_GETFL);
+flags |= O_NONBLOCK;
+fcntl(sock, F_SETFL, flags);*/
+        
+    
+    
     memset((char *) &si_local, 0, sizeof(si_local));
     
     si_local.sin_family = AF_INET;
@@ -312,7 +342,7 @@ void network_stop( void )
 {
     network_running = 0;
  
-    sleep(1);
+    sleep(2);
   
     close(server_sd);
 }
