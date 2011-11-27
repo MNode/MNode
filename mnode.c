@@ -3,7 +3,6 @@
         (C) 2012 
             Jason Hunt (nulluser@gmail.com)
             Robin Stamer (genoce@gmail.com)
-               
     
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
@@ -70,7 +69,7 @@ void mesh_packet(unsigned char *data, unsigned int length)
     unsigned int tx_tar_node_id     = get_word(data+4);//data[2]*256+data[3];
     
     unsigned int tx_type     = data[6];
-    unsigned int tx_checksum = data[7];
+ //   unsigned int tx_checksum = data[7];
 
 
 /*    printf("\nMesh packet\n");
@@ -86,6 +85,14 @@ void mesh_packet(unsigned char *data, unsigned int length)
             printf("[Node %d->%d] IDENT\n", tx_src_node_id, tx_tar_node_id ); // display if new
             
     } else
+    
+    if (tx_type == ID_IDENTRQ)
+    {
+        printf("[Node %d->%d] IDENTQR\n", tx_src_node_id, tx_tar_node_id ); // display if new
+        network_ident();
+    } else
+    
+    
     if (tx_type == ID_STRING)
     {
    

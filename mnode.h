@@ -29,6 +29,11 @@
 #ifndef MNODE_H
 #define MNODE_H
 
+#define STATE_WAIT      0
+#define STATE_LENGTH    1
+#define STATE_DATA      2
+
+
 void *network_thread( void *threadid );
 
 #endif
