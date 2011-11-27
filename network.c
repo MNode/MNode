@@ -61,6 +61,21 @@ int network_running = 0;
 
 
 
+typedef struct
+{
+
+    unsigned int node_id;
+
+
+} node_entry;
+
+
+node_entry *nodes;
+
+
+
+
+
 /* Compute checksum of packet */
 unsigned int get_checksum(unsigned char *buff, unsigned int len)
 {
@@ -121,21 +136,13 @@ void network_string (unsigned char *s )
    
     strcpy((char*)(buffer + 6), (char *)s);
    
-   buffer[length] = 0;
-   
-   
+    buffer[length] = 0;
+      
     // COmpute checksum  
     buffer[5] = get_checksum(buffer, length); 
                  
     network_send(buffer, length);
 }
-
-
-
-
-
-
-
 
 
 
@@ -146,8 +153,6 @@ int network_send(unsigned char *data, unsigned int length)
     struct sockaddr_in si_remote_temp;
     
     int s, slen=sizeof(si_remote_temp);
-    
-   
 
     int yes = 1; 
     int status;
@@ -158,15 +163,13 @@ int network_send(unsigned char *data, unsigned int length)
         printf("socket error\n");
         return 1;
     }
-    
-    
    
     memset((char *) &si_remote_temp, 0, sizeof(si_remote_temp));
     si_remote_temp.sin_family = AF_INET;
     si_remote_temp.sin_port = htons(LISTEN_PORT);
         
            
-      status = setsockopt(s, SOL_SOCKET, SO_BROADCAST, &yes, sizeof(int) );
+    status = setsockopt(s, SOL_SOCKET, SO_BROADCAST, &yes, sizeof(int) );
     //  printf("Setsockopt Status = %d\n", status);        
         
         
@@ -334,6 +337,9 @@ void network_start( void (*mesh_parser_link)(unsigned char *, unsigned int) )
     }
 
     pthread_create(&network_t, NULL, network_thread, NULL);
+    
+    network_ident (); // send own init
+    
 }
 /* End of network_start */
 

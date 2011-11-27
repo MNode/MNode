@@ -31,9 +31,7 @@
 
 #include <unistd.h>
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+
 
 
 
@@ -72,11 +70,12 @@ void mesh_packet(unsigned char *data, unsigned int length)
     unsigned int tx_type     = data[4];
     unsigned int tx_checksum = data[5];
 
-    printf("\nMesh packet\n");
+
+/*    printf("\nMesh packet\n");
     printf(" Length: %d\n", tx_length);
     printf(" Node: %d\n", tx_node);
     printf(" Type: %d\n", tx_type);
-    printf(" Checksum: %d\n", tx_checksum);
+    printf(" Checksum: %d\n", tx_checksum);*/
     
     
     if (tx_type == ID_IDENT)
