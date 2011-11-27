@@ -27,8 +27,8 @@
 
 #include <stdio.h>
 #include <string.h>
-
 #include <unistd.h>
+#include <sys/sysinfo.h>
 
 
 #include "mnode.h"
@@ -36,6 +36,13 @@
 #include "network.h"
 
 #define MODULE_NAME "[MNode] "
+
+
+// system datataps  
+
+unsigned int local_freeram;
+unsigned int local_procs;
+
 
 
 
@@ -128,7 +135,12 @@ void mnode_update( void )
 {
     //printf("Update\n");
 
+    struct sysinfo si;
+    sysinfo(&si);
+ 
 
+    local_freeram = si.freeram;
+    local_procs = si.procs;
 
 }
 /* End of mnode_update */
@@ -140,7 +152,12 @@ int mnode_start(void)
 {
     network_start(mnode_packet, mnode_update);
 
+     // Add system taps
+  
+    data_tap_add("freeram", DT_INT32, &local_freeram);
+    data_tap_add("procs", DT_INT32, &local_procs);
  
+  
     return MN_SUCCESS;
 }
 /* End of mnode_start */

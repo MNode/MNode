@@ -287,25 +287,28 @@ void network_datatap_data (datatap_type *dt)
    strcpy((char *)(buffer+i), dt->tap_name);
     i+=32;
     
-      
+    
+         unsigned int value =  *((unsigned int *)dt->tap_link);
+       
+       
        
     if (dt->tap_type == DT_INT8)
     {
-        buffer[i++] = dt->tap_value & 0xff;
+        buffer[i++] = value & 0xff;
     }
     
     if (dt->tap_type == DT_INT16)
     {
-        buffer[i++] = dt->tap_value >> 8;
-        buffer[i++] = dt->tap_value & 0xff;
+        buffer[i++] = value >> 8;
+        buffer[i++] = value & 0xff;
     }
     
     if (dt->tap_type == DT_INT32)
     {
-        buffer[i++] = dt->tap_value >> 24;    
-        buffer[i++] = dt->tap_value >> 16;    
-        buffer[i++] = dt->tap_value >> 8;
-        buffer[i++] = dt->tap_value & 0xff;
+        buffer[i++] = value >> 24;    
+        buffer[i++] = value >> 16;    
+        buffer[i++] = value >> 8;
+        buffer[i++] = value & 0xff;
     }
         
     buffer[TX_DATA_OFS-1] = get_checksum(buffer, length);

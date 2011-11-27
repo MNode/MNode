@@ -28,18 +28,61 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
-#include <sys/sysinfo.h>
+
 
 #include "datatap.h"
 #include "network.h"
 
-datatap_type t1;
+datatap_type *data_taps = NULL;
+
+
+
+
+
+void data_tap_add(char *name, unsigned int tap_type, void * tap_link)
+{
+    datatap_type *tmp = (datatap_type *)malloc(sizeof(datatap_type));
+
+    strcpy(tmp->tap_name, name);
+
+    tmp->tap_type = tap_type;
+
+    tmp->tap_link = tap_link;
+
+    tmp->next = data_taps;
+    
+    data_taps = tmp;
+    
+//    network_datatap_data (&t1);
+   
+
+}
+
+
+
+
+
+
+
+
+
+
+
 
 
 /* Respond to poll request */
 void datatap_poll( void )
 {
-    struct sysinfo si;
+    datatap_type *tmp = data_taps;
+
+    while(tmp)
+    {
+        network_datatap_data (tmp);
+        tmp = tmp->next;
+    }
+
+
+/*    struct sysinfo si;
     sysinfo(&si);
   
     strcpy(t1.tap_name,"freeram");
@@ -50,7 +93,7 @@ void datatap_poll( void )
     strcpy(t1.tap_name,"processes");
     t1.tap_type = DT_INT32;
     t1.tap_value = si.procs;
-    network_datatap_data (&t1);   
+    network_datatap_data (&t1);   */
     
 }
 
@@ -82,10 +125,8 @@ void datatap_data( unsigned int node_id,
                    unsigned int length )
 {
     unsigned int tap_type = data[0];
-    int i;
-    
-    
-       
+ //   int i;
+      
     
    
 //    printf("\nNode | Tap                            | Type   | Len  |            Value\n");

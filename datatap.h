@@ -37,15 +37,19 @@
 #define DT_STRING   4
 
 
-typedef struct
+typedef struct datatap_type
 {
-
     char tap_name[32];
-
-
 
     unsigned int tap_type;
     unsigned int tap_value;
+    
+    
+    void *tap_link;
+       
+    
+    struct datatap_type *next;
+        
 
 }datatap_type;
 
@@ -57,6 +61,13 @@ void datatap_poll( void );
 void datatap_data( unsigned int node_id, 
                    unsigned char *data,  
                    unsigned int length );
+
+
+
+void data_tap_add(char *name,
+                 unsigned int tap_type,
+                 void * tap_link);
+
 
 #endif
 
