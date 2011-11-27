@@ -28,7 +28,16 @@
 
 #include <stdio.h>
 #include <string.h>
+
 #include <unistd.h>
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+
+
+
 #include "mnode.h"
 #include "network.h"
 
@@ -43,9 +52,6 @@ int main_running;
 #define STATE_LENGTH    1
 #define STATE_DATA      2
 
-
-int rx_state = STATE_WAIT;
-unsigned int rx_len = 0;
 
 
 
@@ -121,8 +127,7 @@ void command_ident( void )
 /* Menu command - help */
 void command_string( char *s )
 {
-printf("string\n");
-    network_string(s);
+    network_string((unsigned char *)s);
 
 }
 /* End of command_help */

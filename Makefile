@@ -1,13 +1,13 @@
-# Makefile for Robot Controller
+# Makefile for MNode
 # (C) 2005 Jason Hunt - nulluser@gmail.com
 #
+
 CFLAGS=-O4 -Wall
 LIBS=-l pthread
 EXE=mnode
 
 mnode:	mnode.o network.o
 	$(CC)	mnode.o network.o -o $(EXE) $(LIBS)
-	#cp	server /bin/server
 
 	
 mnode.o:	mnode.c  mnode.h
