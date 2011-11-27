@@ -32,15 +32,11 @@
 int network_init( void );
 void network_start( void (*mesh_parser_link)(unsigned char *, unsigned int) );
 void network_stop( void );
-<<<<<<< HEAD:network.h
 int network_send(unsigned char *data, unsigned int length);
 
 void network_ident (void );
 void network_string (unsigned char *s );
 
-=======
-void network_ident( void );
->>>>>>> b1ead17eda875a034ab87687408d4e9f75a11515:network.h
 
 
 
