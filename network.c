@@ -28,14 +28,17 @@
 #define MODULE_NAME "[Network] "
 
 #include <stdio.h>
-
 #include <pthread.h>
 #include <stdlib.h>
 #include <memory.h>
 #include <errno.h>
 #include <arpa/inet.h>
 
-#define BUFLEN 512   
+
+#include "network.h"
+
+
+#define BUFLEN 4096 
 #define LISTEN_PORT 9998
 #define BCAST_IP "255.255.255.255"
 
@@ -43,22 +46,97 @@ int server_sd;              // server socket
 
 pthread_t network_t;
 
+int node_id = 0;
 
 struct sockaddr_in si_local, si_remote;
-void (*mesh_parser)(char *) = NULL;
+void (*mesh_parser)(unsigned char *, unsigned int) = NULL;
 
 
 int network_running = 0;
 
 
+
+
+/* Compute checksum of packet */
+unsigned int get_checksum(unsigned char *buff, unsigned int len)
+{
+	unsigned char ck = 0;
+	
+	while(len)
+	{
+		ck += buff[--len];
+	}
+
+	return(ck);
+}
+/* End of get_checksum */
+
+
+
+
+
+void network_ident (void )
+{
+
+unsigned char buffer[100];
+
+    unsigned int length = 6;
+
+    buffer[0] = length >> 8;
+    buffer[1] = length &  0xff;
+
+    buffer[2] = node_id >> 8;
+    buffer[3] = node_id &  0xff;
+
+    buffer[4] = ID_IDENT;
+    buffer[5] = get_checksum(buffer, 5);
+    
+    network_send(buffer, length);
+
+}
+
+
+
+void network_string (char *s )
+{
+
+/*unsigned char buffer[100];
+
+    unsigned int length = 6;
+
+    buffer[0] = length >> 8;
+    buffer[1] = length &  0xff;
+
+    buffer[2] = node_id >> 8;
+    buffer[3] = node_id &  0xff;
+
+   buffer[4] = ID_IDENT;
+    
+    
+    buffer[5] = get_checksum(buffer, 5);
+    
+    network_send(buffer, length);*/
+
+}
+
+
+
+
+
+
+
+
+
+
+
 /* Send data to all nodes */
-int network_send(char *data)
+int network_send(unsigned char *data, unsigned int length)
 {
     struct sockaddr_in si_remote_temp;
     
     int s, i, slen=sizeof(si_remote_temp);
     
-    char buf[BUFLEN];
+   
 
     int yes = 1; 
     int status;
@@ -87,9 +165,9 @@ int network_send(char *data)
         return 1;
     }
           
-    sprintf(buf, "%s", data);
+    //sprintf(buf, "%s", data);
     
-    if (sendto(s, buf, BUFLEN, 0, (struct sockaddr *)&si_remote_temp, slen)==-1)
+    if (sendto(s, data, length, 0, (struct sockaddr *)&si_remote_temp, slen)==-1)
     {
         printf("Sendto fail\n");
         return 1;
@@ -115,14 +193,16 @@ void *network_thread( void *threadid )
     
     while(network_running)
     {
-        if (recvfrom(server_sd, buf, BUFLEN, 0, (struct sockaddr *)&si_remote, &slen)==-1)
+        int ret = recvfrom(server_sd, buf, BUFLEN, 0, (struct sockaddr *)&si_remote, &slen);
+       
+        if (ret ==-1)
         {
             printf("recvfrom fail");
             continue;
             
         }
        
-        mesh_parser(buf);
+        mesh_parser(buf, ret);
         
 /*                        
         printf("Data from: %s:%d\n", inet_ntoa(si_remote.sin_addr),
@@ -144,6 +224,28 @@ void *network_thread( void *threadid )
 /* init the network */
 int network_init( void )
 {
+
+    // load node id
+    
+    node_id = 0;
+    FILE *f = fopen("node_id", "rt");
+    if (!f)
+    {
+        printf("Unable to load node_id\n");
+        return 1;
+    }
+
+    fscanf(f, "%d", &node_id);
+    
+    if (node_id == 0)
+    {
+        printf("node_id 0 not allowed\n");
+        return  1;
+    }
+
+    printf("Node id: %d\n", node_id);
+
+
     int i;
     
     if ((server_sd=socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP))==-1)
@@ -179,7 +281,7 @@ int network_init( void )
 /* End of network_init */
 
 /* Start network layer */
-void network_start( void (*mesh_parser_link)(char *) )
+void network_start( void (*mesh_parser_link)(unsigned char *, unsigned int) )
 {
     // Link Parser
     mesh_parser = mesh_parser_link;

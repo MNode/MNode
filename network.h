@@ -30,9 +30,28 @@
 #define NETWORK_H
 
 int network_init( void );
-void network_start( void (*mesh_parser_link)(char *) );
+void network_start( void (*mesh_parser_link)(unsigned char *, unsigned int) );
+
 void network_stop( void );
-int network_send(char *data);
+
+
+int network_send(unsigned char *data, unsigned int length);
+
+
+#define ID_IDENT   1
+#define ID_TEXT    10
+
+
+
+
+
+
+
+
+
+
+
+
 
 #endif
 

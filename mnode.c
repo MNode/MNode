@@ -30,27 +30,49 @@
 #include "mnode.h"
 #include "network.h"
 
-#define MODULE_NAME "[MNODE] "
+#define MODULE_NAME "[MNode] "
 
 
 int main_running;
 
 
 
+#define STATE_WAIT      0
+#define STATE_LENGTH    1
+#define STATE_DATA      2
+
+
+int rx_state = STATE_WAIT;
+unsigned int rx_len = 0;
+
+
+
+
+
+
+
+
+
+
+
 /* All network traffic is router through here */
-void mesh_data(char *data)
+void mesh_packet(unsigned char *data, unsigned int length)
 {
-    printf("Mesh: %s\n", data);
+    unsigned int tx_length   = data[0]*256+data[1];
+    unsigned int tx_node     = data[2]*256+data[3];
+    unsigned int tx_type     = data[4];
+    unsigned int tx_checksum = data[length-1];
 
-
-
-
-
-
-
-
+    printf("Mesh packet\n");
+    printf("Length: %d\n", tx_length);
+    printf("Node: %d\n", tx_node);
+    printf("Type: %d\n", tx_type);
+    printf("Checksum: %d\n", tx_checksum);
 }
 /* End of mesh_data */
+
+
+
 
 /* Menu command - exit */
 void command_exit( void )
@@ -60,9 +82,9 @@ void command_exit( void )
 /* End of command_exit */
 
 /* Menu command - send */
-void command_send( void )
+void command_ident( void )
 {
-    network_send("Test Data");
+    network_ident();
 }
 /* End of command_send */
 
@@ -71,7 +93,7 @@ void command_help( void )
 {
     printf("Commands\n");
     printf("exit    quit program\n");
-    printf("send    send to nodes\n");
+    printf("ident   send ident\n");
     printf("help    this message\n");
 }
 /* End of command_help */
@@ -88,7 +110,7 @@ int main ( void )
 
     main_running = 1;
 
-    network_start(mesh_data);
+    network_start(mesh_packet);
 
        
     while(main_running)
@@ -100,7 +122,7 @@ int main ( void )
         s[b-1] = 0; // Erase netline
         
         if (!strcmp(s, "exit")) command_exit();
-        if (!strcmp(s, "send")) command_send();
+        if (!strcmp(s, "ident")) command_ident();
         if (!strcmp(s, "help")) command_help();
 
     }
