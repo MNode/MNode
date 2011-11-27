@@ -81,7 +81,7 @@ void mesh_packet(unsigned char *data, unsigned int length)
     {
    
     
-        printf("[Node %d] Text: ", tx_node);
+        printf("[Node %d] STRING: ", tx_node);
         
         for (i = 0; i < tx_length-6; i++)
             printf("%c", data[i+TX_DATA_OFS]);
