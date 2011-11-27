@@ -34,6 +34,11 @@
 #define STATE_DATA      2
 
 
-void *network_thread( void *threadid );
+int mnode_start(void);
+int mnode_stop(void);
+ 
+
+
+//void *network_thread( void *threadid );
 
 #endif
