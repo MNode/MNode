@@ -90,20 +90,22 @@ unsigned char buffer[100];
     buffer[3] = node_id &  0xff;
 
     buffer[4] = ID_IDENT;
-    buffer[5] = get_checksum(buffer, 5);
+    buffer[5] = 0;  // No checksum for now
     
+    buffer[5] = get_checksum(buffer, length);
+
+   
     network_send(buffer, length);
 
 }
 
 
 
-void network_string (char *s )
+void network_string (unsigned char *s )
 {
+    unsigned char buffer[256];
 
-/*unsigned char buffer[100];
-
-    unsigned int length = 6;
+    unsigned int length = strlen(s) + 6;
 
     buffer[0] = length >> 8;
     buffer[1] = length &  0xff;
@@ -111,13 +113,18 @@ void network_string (char *s )
     buffer[2] = node_id >> 8;
     buffer[3] = node_id &  0xff;
 
-   buffer[4] = ID_IDENT;
-    
-    
-    buffer[5] = get_checksum(buffer, 5);
-    
-    network_send(buffer, length);*/
-
+    buffer[4] = ID_STRING;
+    buffer[5] = 0; // No checksum for now
+   
+    strcpy(buffer + 6, s);
+   
+   buffer[length] = 0;
+   
+   
+    // COmpute checksum  
+    buffer[5] = get_checksum(buffer, length); 
+                 
+    network_send(buffer, length);
 }
 
 

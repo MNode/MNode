@@ -1,0 +1,17 @@
+Mesh Network
+
+
+
+
+Packet Format:
+
+    buffer[0]   length high byte
+    buffer[1]   length low byte
+
+    buffer[2]   node_id high byte
+    buffer[3]   node_id low byte
+
+    buffer[4]   packet type
+    buffer[5]   checksum  (sum of all bytes)
+    
+    buffer[6] ...  data

@@ -49,27 +49,53 @@ unsigned int rx_len = 0;
 
 
 
-
-
-
-
-
+/* Return a word from inside a buffer */
+unsigned int get_word(unsigned char * b)
+{
+    return (*b << 8) + *(b+1);
+}
 
 
 
 /* All network traffic is router through here */
 void mesh_packet(unsigned char *data, unsigned int length)
 {
-    unsigned int tx_length   = data[0]*256+data[1];
-    unsigned int tx_node     = data[2]*256+data[3];
+    unsigned int i;
+    unsigned int tx_length   = get_word(data);//data[0]*256+data[1];
+    unsigned int tx_node     = get_word(data+2);//data[2]*256+data[3];
     unsigned int tx_type     = data[4];
-    unsigned int tx_checksum = data[length-1];
+    unsigned int tx_checksum = data[5];
 
-    printf("Mesh packet\n");
-    printf("Length: %d\n", tx_length);
-    printf("Node: %d\n", tx_node);
-    printf("Type: %d\n", tx_type);
-    printf("Checksum: %d\n", tx_checksum);
+    printf("\nMesh packet\n");
+    printf(" Length: %d\n", tx_length);
+    printf(" Node: %d\n", tx_node);
+    printf(" Type: %d\n", tx_type);
+    printf(" Checksum: %d\n", tx_checksum);
+    
+    
+    if (tx_type == ID_IDENT)
+    {
+        printf("[Node %d] IDENT\n", tx_node);
+    } else
+    if (tx_type == ID_STRING)
+    {
+   
+    
+        printf("[Node %d] Text: ", tx_node);
+        
+        for (i = 0; i < tx_length-6; i++)
+            printf("%c", data[i+TX_DATA_OFS]);
+        
+        printf("\n");
+        
+    
+    } else
+    {
+    
+        printf("Unknown packet type from %d\n", tx_node);
+    
+    }
+    
 }
 /* End of mesh_data */
 
@@ -90,6 +116,22 @@ void command_ident( void )
 }
 /* End of command_send */
 
+
+
+/* Menu command - help */
+void command_string( char *s )
+{
+printf("string\n");
+    network_string(s);
+
+}
+/* End of command_help */
+
+
+
+
+
+
 /* Menu command - help */
 void command_help( void )
 {
@@ -99,6 +141,10 @@ void command_help( void )
     printf("help    this message\n");
 }
 /* End of command_help */
+
+
+
+
 
 
 /* Main */
@@ -123,9 +169,16 @@ int main ( void )
                 
         if (0 < b) s[b-1] = 0; // Erase netline
         
+        
         if (!strcmp(s, "exit")) command_exit();
         if (!strcmp(s, "ident")) command_ident();
         if (!strcmp(s, "help")) command_help();
+        if (!strcmp(s, "send")) 
+        {
+        printf("Message: ");
+         b = getline(&s, &len, stdin);
+        command_string(s);
+        }
 
     }
     

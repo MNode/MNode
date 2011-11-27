@@ -39,17 +39,11 @@ void network_ident( void );
 int network_send(unsigned char *data, unsigned int length);
 
 
+#define TX_DATA_OFS 6
+
+
 #define ID_IDENT   1
-#define ID_TEXT    10
-
-
-
-
-
-
-
-
-
+#define ID_STRING    10
 
 
 
