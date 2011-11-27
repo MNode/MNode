@@ -4,6 +4,6 @@
 
 CFLAGS=-O4 -Wall
 LIBS=-l pthread
-EXE=bin/mnode
+EXE=bin/monitor
 UI=bin/mnodemon
 

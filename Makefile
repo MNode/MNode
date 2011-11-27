@@ -4,11 +4,14 @@
 
 include Makefile.inc
 
-mnode:	mnode.o datatap.o network.o bin
-	$(CC)	mnode.o datatap.o network.o -o $(EXE) $(LIBS)
+monitor:	monitor.o mnode.o datatap.o network.o  bin
+	$(CC)	monitor.o mnode.o datatap.o network.o -o $(EXE) $(LIBS)
 
 $(UI): bin
 	cd ui; make
+
+monitor.o:	monitor.c  monitor.h mnode.h network.h
+	$(CC)	-c monitor.c -o monitor.o $(CFLAGS)
 
 mnode.o:	mnode.c  mnode.h network.h
 	$(CC)	-c mnode.c -o mnode.o $(CFLAGS)
@@ -22,7 +25,7 @@ network.o:	network.c  network.h
 bin:
 	mkdir bin
 
-
 .PHONY: clean
 clean:
 	rm	-f *.o $(EXE) $(UI)
+
