@@ -430,7 +430,9 @@ void *network_thread( void *threadid )
                 time_count = 0;
                 network_ident();            // Set out  keep alive
             }
-                
+         
+            network->mesh_update();
+                              
             // Timeout ?
         }   
         
@@ -518,7 +520,7 @@ fcntl(sock, F_SETFL, flags);*/
 
 
 /* Start network layer */
-void network_start( void (*mesh_parser_link)(unsigned char *, unsigned int) )
+void network_start( void (*mesh_parser_link)(unsigned char *, unsigned int), void (*mesh_update)(void) )
 {
     network = (network_type *) malloc (sizeof(network_type));
     
@@ -527,11 +529,20 @@ void network_start( void (*mesh_parser_link)(unsigned char *, unsigned int) )
     network->mesh_parser = NULL;
     network->running = 0;
 
+
+
     network->node_list = NULL;
+
+
+
 
 
     // Link Parser
     network->mesh_parser = mesh_parser_link;
+
+    // Link Parser
+    network->mesh_update = mesh_update;
+
 
     if (network_init())
     {

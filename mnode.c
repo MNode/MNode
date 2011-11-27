@@ -44,11 +44,11 @@ unsigned int get_word(unsigned char * b)
 {
     return (*b << 8) + *(b+1);
 }
-
+/* End of get_word */
 
 
 /* All network traffic is router through here */
-void mesh_packet(unsigned char *data, unsigned int length)
+void mnode_packet(unsigned char *data, unsigned int length)
 {
     unsigned int i;
     unsigned int tx_length   = get_word(data);//data[0]*256+data[1];
@@ -118,31 +118,47 @@ void mesh_packet(unsigned char *data, unsigned int length)
 
 
 
- 
- int mnode_start(void)
- {
- 
- 
-    network_start(mesh_packet);
 
- 
- return 0;
- }
- 
- 
 
- 
- int mnode_stop(void)
- {
- 
+
+
+
+
+
+
+
+/* Called by networking code every second */
+int mnode_update( void )
+{
+    //printf("Update\n");
+
+
+
+
+}
+/* End of mnode_update */
+
+
+
+/* Start node */
+int mnode_start(void)
+{
+    network_start(mnode_packet, mnode_update);
+
  
     return 0;
- }
- 
- 
- 
- 
- 
+}
+/* End of mnode_start */
+
+
+
+/* Stop node */
+int mnode_stop(void)
+{
+    return 0;
+}
+/* End of mnode_stop */
+
  
 
 

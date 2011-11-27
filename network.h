@@ -44,6 +44,11 @@
 #define ID_STRING           10              // Sending string 
 
 
+#define ID_DTPOLL           20              // send datatap poll request
+#define ID_DTDATA           21              // send datatap poll request
+
+
+
 /* Node entry */
 typedef struct node_entry
 {
@@ -62,6 +67,9 @@ typedef struct
 
     struct sockaddr_in si_local, si_remote;
     void (*mesh_parser)(unsigned char *, unsigned int);
+    
+    void (*mesh_update)(void);
+    
 
     int running;
     
@@ -71,7 +79,7 @@ typedef struct
 
 
 int network_init( void );
-void network_start( void (*mesh_parser_link)(unsigned char *, unsigned int) );
+void network_start( void (*mesh_parser_link)(unsigned char *, unsigned int), void (*mesh_update)(void) );
 void network_stop( void );
 int network_send(unsigned char *data, unsigned int length);
 
@@ -81,6 +89,14 @@ void network_string (unsigned char *s );
 int network_add_node(unsigned int tx_node_id);
 void network_list_nodes( void );
 void network_free_nodes( void );
+
+
+void network_datatap_poll (void );
+void network_datatap_data (datatap_type *d);
+
+
+
+
 
 
 #endif
