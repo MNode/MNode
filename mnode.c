@@ -3,7 +3,6 @@
         (C) 2012 
             Jason Hunt (nulluser@gmail.com)
             Robin Stamer (genoce@gmail.com)
-               
     
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
@@ -28,8 +27,16 @@
 
 #include <stdio.h>
 #include <string.h>
+
 #include <unistd.h>
+
+
+
+
+
+
 #include "mnode.h"
+#include "datatap.h"
 #include "network.h"
 
 #define MODULE_NAME "[MNode] "
@@ -43,9 +50,6 @@ int main_running;
 #define STATE_LENGTH    1
 #define STATE_DATA      2
 
-
-int rx_state = STATE_WAIT;
-unsigned int rx_len = 0;
 
 
 
@@ -62,26 +66,53 @@ void mesh_packet(unsigned char *data, unsigned int length)
 {
     unsigned int i;
     unsigned int tx_length   = get_word(data);//data[0]*256+data[1];
-    unsigned int tx_node     = get_word(data+2);//data[2]*256+data[3];
-    unsigned int tx_type     = data[4];
-    unsigned int tx_checksum = data[5];
+    unsigned int tx_src_node_id     = get_word(data+2);//data[2]*256+data[3];
+    unsigned int tx_tar_node_id     = get_word(data+4);//data[2]*256+data[3];
+    
+    unsigned int tx_type     = data[6];
+ //   unsigned int tx_checksum = data[7];
 
-    printf("\nMesh packet\n");
+
+/*    printf("\nMesh packet\n");
     printf(" Length: %d\n", tx_length);
     printf(" Node: %d\n", tx_node);
     printf(" Type: %d\n", tx_type);
-    printf(" Checksum: %d\n", tx_checksum);
+    printf(" Checksum: %d\n", tx_checksum);*/
     
     
     if (tx_type == ID_IDENT)
     {
-        printf("[Node %d] IDENT\n", tx_node);
+        if (network_add_node(tx_src_node_id) == 0)       // Add to node list
+            printf("[Node %d->%d] IDENT\n", tx_src_node_id, tx_tar_node_id ); // display if new
+            
     } else
+    
+    if (tx_type == ID_IDENTRQ)
+    {
+       // printf("[Node %d->%d] IDENTQR\n", tx_src_node_id, tx_tar_node_id );
+        network_ident();
+    } else
+
+
+    if (tx_type == ID_DTPOLL)
+    {
+        //printf("[Node %d->%d] DTPOLL\n", tx_src_node_id, tx_tar_node_id );
+        datatap_poll();
+    } else
+
+    if (tx_type == ID_DTDATA)
+    {
+       // printf("[Node %d->%d] DTDATA\n", tx_src_node_id, tx_tar_node_id );
+     
+       datatap_data(tx_src_node_id, data + TX_DATA_OFS, length-TX_DATA_OFS);
+        
+    } else
+
     if (tx_type == ID_STRING)
     {
    
     
-        printf("[Node %d] STRING: ", tx_node);
+        printf("[Node %d->%d] STRING: ", tx_src_node_id, tx_tar_node_id );
         
         for (i = 0; i < tx_length-6; i++)
             printf("%c", data[i+TX_DATA_OFS]);
@@ -92,7 +123,7 @@ void mesh_packet(unsigned char *data, unsigned int length)
     } else
     {
     
-        printf("Unknown packet type from %d\n", tx_node);
+        printf("Unknown packet type from %d->%d\n", tx_src_node_id, tx_tar_node_id );
     
     }
     
@@ -121,13 +152,33 @@ void command_ident( void )
 /* Menu command - help */
 void command_string( char *s )
 {
-printf("string\n");
-    network_string(s);
+    network_string((unsigned char *)s);
 
 }
 /* End of command_help */
 
 
+/* Menu command - help */
+void command_nodes( void )
+{
+    network_list_nodes();
+
+}
+/* End of command_help */
+
+
+
+void command_data( void )
+{
+    printf("Not implemented\n");
+}
+
+
+void command_nodedata( void )
+{
+    printf("Sending Request\n");
+    network_datatap_poll();
+}
 
 
 
@@ -136,13 +187,16 @@ printf("string\n");
 void command_help( void )
 {
     printf("Commands\n");
-    printf("exit    quit program\n");
-    printf("ident   send ident\n");
-    printf("help    this message\n");
+    printf("exit        Quit program\n");
+    printf("ident       Send ident\n");
+    printf("send        Send string\n");
+    printf("nodes       List nodes\n");
+    printf("data        List data for this node\n");
+    printf("nodedata    List all nodedata\n");
+    
+    printf("help        Display this message\n");
 }
 /* End of command_help */
-
-
 
 
 
@@ -173,6 +227,9 @@ int main ( void )
         if (!strcmp(s, "exit")) command_exit();
         if (!strcmp(s, "ident")) command_ident();
         if (!strcmp(s, "help")) command_help();
+        if (!strcmp(s, "nodes")) command_nodes();
+        if (!strcmp(s, "data")) command_data();
+        if (!strcmp(s, "nodedata")) command_nodedata();        
         if (!strcmp(s, "send")) 
         {
         printf("Message: ");

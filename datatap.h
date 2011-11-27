@@ -2,8 +2,7 @@
     Mesh Protocol Test 
         (C) 2012 
             Jason Hunt (nulluser@gmail.com)
-            Ling
-               
+            Robin Stamer (genoce@gmail.com)
     
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
@@ -20,20 +19,21 @@
     Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
     Contact:    nulluser@gmail.com
-                Ling
+                genoce@gmail.com
 
-    File: mnode.h
+    File: datatap.h
 */
 
 
-#ifndef MNODE_H
-#define MNODE_H
 
-#define STATE_WAIT      0
-#define STATE_LENGTH    1
-#define STATE_DATA      2
+#ifndef DATATAP_H
+#define DATATAP_H
 
 
-void *network_thread( void *threadid );
+
+
+
 
 #endif
+
+
