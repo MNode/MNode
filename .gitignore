@@ -1,3 +1,4 @@
 /mnode
 *.o
 node_id
+/bin
