@@ -66,7 +66,7 @@ void mesh_packet(unsigned char *data, unsigned int length)
 {
     unsigned int i;
     unsigned int tx_length   = get_word(data);//data[0]*256+data[1];
-    unsigned int tx_node     = get_word(data+2);//data[2]*256+data[3];
+    unsigned int tx_node_id     = get_word(data+2);//data[2]*256+data[3];
     unsigned int tx_type     = data[4];
     unsigned int tx_checksum = data[5];
 
@@ -80,13 +80,17 @@ void mesh_packet(unsigned char *data, unsigned int length)
     
     if (tx_type == ID_IDENT)
     {
-        printf("[Node %d] IDENT\n", tx_node);
+        
+        network_add_node(tx_node_id);       // Add to node list
+
+
+        printf("[Node %d] IDENT\n", tx_node_id);
     } else
     if (tx_type == ID_STRING)
     {
    
     
-        printf("[Node %d] STRING: ", tx_node);
+        printf("[Node %d] STRING: ", tx_node_id);
         
         for (i = 0; i < tx_length-6; i++)
             printf("%c", data[i+TX_DATA_OFS]);
@@ -97,7 +101,7 @@ void mesh_packet(unsigned char *data, unsigned int length)
     } else
     {
     
-        printf("Unknown packet type from %d\n", tx_node);
+        printf("Unknown packet type from %d\n", tx_node_id);
     
     }
     
@@ -132,6 +136,15 @@ void command_string( char *s )
 /* End of command_help */
 
 
+/* Menu command - help */
+void command_nodes( void )
+{
+    network_list_nodes();
+
+}
+/* End of command_help */
+
+
 
 
 
@@ -142,6 +155,8 @@ void command_help( void )
     printf("Commands\n");
     printf("exit    quit program\n");
     printf("ident   send ident\n");
+    printf("send    send string\n");
+    printf("nodes   list nodes\n");
     printf("help    this message\n");
 }
 /* End of command_help */
@@ -177,6 +192,7 @@ int main ( void )
         if (!strcmp(s, "exit")) command_exit();
         if (!strcmp(s, "ident")) command_ident();
         if (!strcmp(s, "help")) command_help();
+        if (!strcmp(s, "nodes")) command_nodes();
         if (!strcmp(s, "send")) 
         {
         printf("Message: ");

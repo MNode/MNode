@@ -60,18 +60,76 @@ int network_running = 0;
 
 
 
-
-typedef struct
+/* Node entry */
+typedef struct node_entry
 {
-
     unsigned int node_id;
-
-
+    struct node_entry *next;
 } node_entry;
 
 
-node_entry *nodes;
 
+// Node list
+node_entry *node_list = NULL;
+
+
+/* Add node to list */
+void network_add_node(unsigned int tx_node_id)
+{
+    node_entry *tmp = node_list;
+
+    // See if node is already in list 
+
+    while (tmp)
+    {
+        if (tmp->node_id == tx_node_id)
+            return;
+    
+        tmp = tmp-> next;
+    }
+
+    // Insert node
+    tmp = (node_entry*) malloc(sizeof(node_entry));
+    tmp->next = node_list;
+    tmp->node_id = tx_node_id;
+    node_list = tmp;
+}
+/* End of network_add_node */
+
+
+
+/* Display node list */
+void network_list_nodes( void )
+{
+    node_entry *tmp = node_list;
+    
+    printf("Node | Status\n");
+    
+    while(tmp)
+    {
+        printf(" [%d]    ---- \n", tmp->node_id);
+        tmp = tmp->next;
+    }
+    
+    printf("\n");
+}
+/* End of network_list_nodes */
+
+
+/* Free nodes list */
+void network_free_nodes( void )
+{
+    node_entry *tmp = node_list;
+    
+    while(node_list)
+    {
+        tmp = node_list->next;
+        free (node_list);
+        node_list = tmp;
+        
+    }
+}
+/* End of network free nodes */
 
 
 
@@ -351,6 +409,11 @@ void network_stop( void )
     sleep(2);
   
     close(server_sd);
+    
+    
+    network_free_nodes();
+    
+    
 }
 /* End of network stop*/
 
