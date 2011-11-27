@@ -31,11 +31,14 @@
 
 int network_init( void );
 void network_start( void (*mesh_parser_link)(unsigned char *, unsigned int) );
-
 void network_stop( void );
-
-
 int network_send(unsigned char *data, unsigned int length);
+
+void network_ident (void );
+void network_string (unsigned char *s );
+
+
+
 
 
 #define TX_DATA_OFS 6
