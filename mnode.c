@@ -36,6 +36,7 @@
 
 
 #include "mnode.h"
+#include "datatap.h"
 #include "network.h"
 
 #define MODULE_NAME "[MNode] "
@@ -88,11 +89,25 @@ void mesh_packet(unsigned char *data, unsigned int length)
     
     if (tx_type == ID_IDENTRQ)
     {
-        printf("[Node %d->%d] IDENTQR\n", tx_src_node_id, tx_tar_node_id ); // display if new
+       // printf("[Node %d->%d] IDENTQR\n", tx_src_node_id, tx_tar_node_id );
         network_ident();
     } else
-    
-    
+
+
+    if (tx_type == ID_DTPOLL)
+    {
+        //printf("[Node %d->%d] DTPOLL\n", tx_src_node_id, tx_tar_node_id );
+        datatap_poll();
+    } else
+
+    if (tx_type == ID_DTDATA)
+    {
+       // printf("[Node %d->%d] DTDATA\n", tx_src_node_id, tx_tar_node_id );
+     
+       datatap_data(tx_src_node_id, data + TX_DATA_OFS, length-TX_DATA_OFS);
+        
+    } else
+
     if (tx_type == ID_STRING)
     {
    
@@ -153,6 +168,18 @@ void command_nodes( void )
 
 
 
+void command_data( void )
+{
+    printf("Not implemented\n");
+}
+
+
+void command_nodedata( void )
+{
+    printf("Sending Request\n");
+    network_datatap_poll();
+}
+
 
 
 
@@ -160,15 +187,16 @@ void command_nodes( void )
 void command_help( void )
 {
     printf("Commands\n");
-    printf("exit    quit program\n");
-    printf("ident   send ident\n");
-    printf("send    send string\n");
-    printf("nodes   list nodes\n");
-    printf("help    this message\n");
+    printf("exit        Quit program\n");
+    printf("ident       Send ident\n");
+    printf("send        Send string\n");
+    printf("nodes       List nodes\n");
+    printf("data        List data for this node\n");
+    printf("nodedata    List all nodedata\n");
+    
+    printf("help        Display this message\n");
 }
 /* End of command_help */
-
-
 
 
 
@@ -200,6 +228,8 @@ int main ( void )
         if (!strcmp(s, "ident")) command_ident();
         if (!strcmp(s, "help")) command_help();
         if (!strcmp(s, "nodes")) command_nodes();
+        if (!strcmp(s, "data")) command_data();
+        if (!strcmp(s, "nodedata")) command_nodedata();        
         if (!strcmp(s, "send")) 
         {
         printf("Message: ");

@@ -35,7 +35,7 @@
 #include <pthread.h>
 #include <errno.h>
 
-
+#include "datatap.h"
 #include "network.h"
 
 network_type * network;         // All Network Data
@@ -176,6 +176,10 @@ void network_identrq (void )
 
 }
 /* End of network_ident */
+
+
+
+
 /* Send string packet */
 void network_string (unsigned char *s )
 {
@@ -208,6 +212,125 @@ void network_string (unsigned char *s )
     network_send(buffer, length);
 }
 /* End of network_string */
+
+
+
+
+
+
+/* Send IDENT packet */
+void network_datatap_poll (void )
+{
+    unsigned char buffer[100];
+
+    unsigned int length = TX_DATA_OFS;
+
+    unsigned int i = 0;
+    
+    buffer[i++] = length >> 8;
+    buffer[i++] = length &  0xff;
+
+    buffer[i++] = network->node_id >> 8;
+    buffer[i++] = network->node_id &  0xff;
+
+    buffer[i++] = 0;//node_id >> 8;
+    buffer[i++] = 0;//node_id &  0xff;
+
+
+    buffer[i++] = ID_DTPOLL;
+    buffer[i++] = 0;  // No checksum for now
+    
+    buffer[TX_DATA_OFS-1] = get_checksum(buffer, length);
+   
+    network_send(buffer, length);
+
+}
+/* End of network_ident */
+
+
+
+/* Send IDENT packet */
+void network_datatap_data (datatap_type *dt)
+{
+    unsigned char buffer[100];
+
+    unsigned int length = TX_DATA_OFS + 1  +32;
+
+    if (dt->tap_type == DT_INT8) length += 1;
+    if (dt->tap_type == DT_INT16) length += 2;
+    if (dt->tap_type == DT_INT32) length += 4;
+
+
+    unsigned int i = 0;
+    
+    
+    buffer[i++] = length >> 8;
+    buffer[i++] = length &  0xff;
+
+    buffer[i++] = network->node_id >> 8;
+    buffer[i++] = network->node_id &  0xff;
+
+    buffer[i++] = 0;//node_id >> 8;
+    buffer[i++] = 0;//node_id &  0xff;
+
+
+    buffer[i++] = ID_DTDATA;
+    
+        buffer[i++] = 0;  // No checksum for now
+    
+    buffer[i++] = dt->tap_type;  // No checksum for now
+    
+      
+    // Copy over tap name
+    memset(buffer+i, 0, 32);
+   strcpy(buffer+i, dt->tap_name);
+    i+=32;
+    
+      
+       
+    if (dt->tap_type == DT_INT8)
+    {
+        buffer[i++] = dt->tap_value & 0xff;
+    }
+    
+    if (dt->tap_type == DT_INT16)
+    {
+        buffer[i++] = dt->tap_value >> 8;
+        buffer[i++] = dt->tap_value & 0xff;
+    }
+    
+    if (dt->tap_type == DT_INT32)
+    {
+        buffer[i++] = dt->tap_value >> 24;    
+        buffer[i++] = dt->tap_value >> 16;    
+        buffer[i++] = dt->tap_value >> 8;
+        buffer[i++] = dt->tap_value & 0xff;
+    }
+        
+    buffer[TX_DATA_OFS-1] = get_checksum(buffer, length);
+
+    network_send(buffer, length);
+}
+/* End of network_ident */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 /* Send data to all nodes */
