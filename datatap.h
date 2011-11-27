@@ -31,8 +31,32 @@
 
 
 
+#define DT_INT8     1
+#define DT_INT16    2
+#define DT_INT32    3
+#define DT_STRING   4
 
 
+typedef struct
+{
+
+    char tap_name[32];
+
+
+
+    unsigned int tap_type;
+    unsigned int tap_value;
+
+}datatap_type;
+
+
+/* Respond to poll request */
+void datatap_poll( void );
+
+/* Got data from other node */
+void datatap_data( unsigned int node_id, 
+                   unsigned char *data,  
+                   unsigned int length );
 
 #endif
 

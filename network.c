@@ -36,6 +36,7 @@
 #include <errno.h>
 
 #include "datatap.h"
+#include "mnode.h"
 #include "network.h"
 
 network_type * network;         // All Network Data
@@ -51,7 +52,7 @@ int network_add_node(unsigned int tx_node_id)
     while (tmp)
     {
         if (tmp->node_id == tx_node_id)
-            return 1;
+            return MN_FAIL;
     
         tmp = tmp-> next;
     }
@@ -62,7 +63,7 @@ int network_add_node(unsigned int tx_node_id)
     tmp->node_id = tx_node_id;
     network->node_list = tmp;
     
-    return 0;
+    return MN_SUCCESS;
     
 }
 /* End of network_add_node */
@@ -283,7 +284,7 @@ void network_datatap_data (datatap_type *dt)
       
     // Copy over tap name
     memset(buffer+i, 0, 32);
-   strcpy(buffer+i, dt->tap_name);
+   strcpy((char *)(buffer+i), dt->tap_name);
     i+=32;
     
       
@@ -319,20 +320,6 @@ void network_datatap_data (datatap_type *dt)
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 /* Send data to all nodes */
 int network_send(unsigned char *data, unsigned int length)
 {
@@ -347,7 +334,7 @@ int network_send(unsigned char *data, unsigned int length)
     if ((s=socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP))==-1)
     {
         printf("socket error\n");
-        return 1;
+        return MN_FAIL;
     }
    
     memset((char *) &si_remote_temp, 0, sizeof(si_remote_temp));
@@ -362,7 +349,7 @@ int network_send(unsigned char *data, unsigned int length)
     if (   inet_pton(AF_INET, BCAST_IP, (struct sockaddr *)&si_remote_temp.sin_addr) == 0 )
     {
         fprintf(stderr, "inet_aton() failed\n");
-        return 1;
+        return MN_FAIL;
     }
           
     //sprintf(buf, "%s", data);
@@ -370,13 +357,13 @@ int network_send(unsigned char *data, unsigned int length)
     if (sendto(s, data, length, 0, (struct sockaddr *)&si_remote_temp, slen)==-1)
     {
         printf("Sendto fail\n");
-        return 1;
+        return MN_FAIL;
        
     }
     
     close(s);
 
-    return 0;
+    return MN_SUCCESS;
 }
 /* End of network_send */
 
@@ -462,7 +449,7 @@ int network_init( void )
     if (!f)
     {
         printf("Unable to load node_id\n");
-        return 1;
+        return MN_FAIL;
     }
 
     fscanf(f, "%d", &network->node_id);
@@ -470,7 +457,7 @@ int network_init( void )
     if (network->node_id == 0)
     {
         printf("node_id 0 not allowed\n");
-        return  1;
+        return MN_FAIL;
     }
 
     printf("Node id: %d\n", network->node_id);
@@ -481,7 +468,7 @@ int network_init( void )
     if ((network->server_sd=socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP))==-1)
     {
         printf(MODULE_NAME "socket error\n");
-        return 1;
+        return MN_FAIL;
     }
     
     
@@ -503,24 +490,24 @@ fcntl(sock, F_SETFL, flags);*/
      {
      
         printf(MODULE_NAME "setsockopt fail");
-        return 1;
+        return MN_FAIL;
      }
  
     if (bind(network->server_sd, (struct sockaddr *)&network->si_local, sizeof(network->si_local))==-1)
     {
         printf(MODULE_NAME "bind error %d\n", errno);
-        return 1;
+        return MN_FAIL;
     }
     
     network->running = 1;
     
-    return 0;
+    return MN_SUCCESS;
 }
 /* End of network_init */
 
 
 /* Start network layer */
-void network_start( void (*mesh_parser_link)(unsigned char *, unsigned int), void (*mesh_update)(void) )
+int network_start( void (*mesh_parser_link)(unsigned char *, unsigned int), void (*mesh_update)(void) )
 {
     network = (network_type *) malloc (sizeof(network_type));
     
@@ -530,11 +517,7 @@ void network_start( void (*mesh_parser_link)(unsigned char *, unsigned int), voi
     network->running = 0;
 
 
-
     network->node_list = NULL;
-
-
-
 
 
     // Link Parser
@@ -547,14 +530,16 @@ void network_start( void (*mesh_parser_link)(unsigned char *, unsigned int), voi
     if (network_init())
     {
         printf(MODULE_NAME "Network setup failed, operating in write-only mode\n");
-        return;
+        return MN_FAIL;
     }
 
     pthread_create(&network->network_t, NULL, network_thread, NULL);
     
     network_ident (); // send own init
-    network_identrq (); // send own init
+    network_identrq (); // request ident from other nodes
     
+    
+    return MN_SUCCESS;
     
 }
 /* End of network_start */

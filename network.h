@@ -79,7 +79,7 @@ typedef struct
 
 
 int network_init( void );
-void network_start( void (*mesh_parser_link)(unsigned char *, unsigned int), void (*mesh_update)(void) );
+int network_start( void (*mesh_parser_link)(unsigned char *, unsigned int), void (*mesh_update)(void) );
 void network_stop( void );
 int network_send(unsigned char *data, unsigned int length);
 

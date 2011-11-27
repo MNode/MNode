@@ -29,6 +29,11 @@
 #ifndef MNODE_H
 #define MNODE_H
 
+#define MN_SUCCESS      0
+#define MN_FAIL         1
+
+
+
 #define STATE_WAIT      0
 #define STATE_LENGTH    1
 #define STATE_DATA      2
@@ -38,7 +43,6 @@ int mnode_start(void);
 int mnode_stop(void);
  
 
-
-//void *network_thread( void *threadid );
-
 #endif
+
+

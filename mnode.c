@@ -123,15 +123,10 @@ void mnode_packet(unsigned char *data, unsigned int length)
 
 
 
-
-
-
-
 /* Called by networking code every second */
-int mnode_update( void )
+void mnode_update( void )
 {
     //printf("Update\n");
-
 
 
 
@@ -146,7 +141,7 @@ int mnode_start(void)
     network_start(mnode_packet, mnode_update);
 
  
-    return 0;
+    return MN_SUCCESS;
 }
 /* End of mnode_start */
 
@@ -155,7 +150,7 @@ int mnode_start(void)
 /* Stop node */
 int mnode_stop(void)
 {
-    return 0;
+    return MN_SUCCESS;
 }
 /* End of mnode_stop */
 
