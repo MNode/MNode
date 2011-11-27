@@ -34,7 +34,7 @@
 #include "datatap.h"
 #include "network.h"
 
-#define MODULE_NAME "[Momitor] "
+#define MODULE_NAME "[Monitor] "
 
 
 int main_running;
