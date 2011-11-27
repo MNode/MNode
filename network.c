@@ -28,9 +28,12 @@
 #define MODULE_NAME "[Network] "
 
 #include <stdio.h>
-#include <pthread.h>
+#include <stdlib.h>
+#include <string.h> 
+#include <unistd.h> 
 #include <stdlib.h>
 #include <memory.h>
+#include <pthread.h>
 #include <errno.h>
 #include <arpa/inet.h>
 
@@ -104,7 +107,7 @@ void network_string (unsigned char *s )
 {
     unsigned char buffer[256];
 
-    unsigned int length = strlen(s) + 6;
+    unsigned int length = strlen((char *)s) + 6;
 
     buffer[0] = length >> 8;
     buffer[1] = length &  0xff;
@@ -115,7 +118,7 @@ void network_string (unsigned char *s )
     buffer[4] = ID_STRING;
     buffer[5] = 0; // No checksum for now
    
-    strcpy(buffer + 6, s);
+    strcpy((char*)(buffer + 6), (char *)s);
    
    buffer[length] = 0;
    
@@ -141,7 +144,7 @@ int network_send(unsigned char *data, unsigned int length)
 {
     struct sockaddr_in si_remote_temp;
     
-    int s, i, slen=sizeof(si_remote_temp);
+    int s, slen=sizeof(si_remote_temp);
     
    
 
@@ -194,13 +197,13 @@ void *network_thread( void *threadid )
 {
     printf(MODULE_NAME "Network Thread - Started\n");
     
-    char buf[BUFLEN];
+    unsigned char buf[BUFLEN];
 
-    int  slen=sizeof(si_remote);
+    unsigned int  slen=sizeof(si_remote);
     
     while(network_running)
     {
-        int ret = recvfrom(server_sd, buf, BUFLEN, 0, (struct sockaddr *)&si_remote, &slen);
+        int ret = recvfrom(server_sd, (char *)buf, BUFLEN, 0, (struct sockaddr *)&si_remote, &slen);
        
         if (ret ==-1)
         {
@@ -253,7 +256,7 @@ int network_init( void )
     printf("Node id: %d\n", node_id);
 
 
-    int i;
+//    int i;
     
     if ((server_sd=socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP))==-1)
     {

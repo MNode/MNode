@@ -8,9 +8,9 @@ mnode:	mnode.o network.o
 
 	
 mnode.o:	mnode.c  mnode.h
-	gcc	-c mnode.c -o mnode.o -O4
+	gcc	-c mnode.c -o mnode.o -O4 -Wall
 
 
 network.o:	network.c  network.h
-	gcc	-c network.c -o network.o -O4
+	gcc	-c network.c -o network.o -O4 -Wall
 
