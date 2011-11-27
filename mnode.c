@@ -2,7 +2,7 @@
     Mesh Protocol Test 
         (C) 2012 
             Jason Hunt (nulluser@gmail.com)
-            Ling
+            Robin Stamer (genoce@gmail.com)
                
     
     This program is free software; you can redistribute it and/or
@@ -20,13 +20,15 @@
     Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
     Contact:    nulluser@gmail.com
-                Ling
+                genoce@gmail.com
 
     File: MNode.c
 */
 
 
 #include <stdio.h>
+#include <string.h>
+#include <unistd.h>
 #include "mnode.h"
 #include "network.h"
 
@@ -148,9 +150,9 @@ void command_help( void )
 /* Main */
 int main ( void )
 {
-    char *s;
-    int len = 0;
-    int b;
+    char  *s;
+    size_t len = 0;
+    int    b;
 
     printf(MODULE_NAME "Startup\n");
 
@@ -165,7 +167,7 @@ int main ( void )
 
         b = getline(&s, &len, stdin);
                 
-        s[b-1] = 0; // Erase netline
+        if (0 < b) s[b-1] = 0; // Erase netline
         
         
         if (!strcmp(s, "exit")) command_exit();
