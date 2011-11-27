@@ -198,15 +198,9 @@ void *network_thread( void *threadid )
 {
     printf(MODULE_NAME "Network Thread - Started\n");
     
-<<<<<<< HEAD:network.c
-    unsigned char buf[BUFLEN];
-
-    unsigned int  slen=sizeof(si_remote);
-=======
     unsigned char  buf[BUFLEN];
 
     socklen_t      slen=sizeof(si_remote);
->>>>>>> b1ead17eda875a034ab87687408d4e9f75a11515:network.c
     
     while(network_running)
     {
