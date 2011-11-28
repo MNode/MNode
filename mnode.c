@@ -44,6 +44,7 @@ unsigned int local_freeram;
 unsigned int local_procs;
 
 
+void (*text_out)(char * format, ...) = NULL;
 
 
 /* Return a word from inside a buffer */
@@ -76,7 +77,7 @@ void mnode_packet(unsigned char *data, unsigned int length)
     if (tx_type == ID_IDENT)
     {
         if (network_add_node(tx_src_node_id) == 0)       // Add to node list
-            printw("[Node %d->%d] IDENT\n", tx_src_node_id, tx_tar_node_id ); // display if new
+            text_out("[Node %d->%d] IDENT\n", tx_src_node_id, tx_tar_node_id ); // display if new
             
     } else
     
@@ -105,18 +106,18 @@ void mnode_packet(unsigned char *data, unsigned int length)
     {
    
     
-        printw("[Node %d->%d] STRING: ", tx_src_node_id, tx_tar_node_id );
+        text_out("[Node %d->%d] STRING: ", tx_src_node_id, tx_tar_node_id );
         
         for (i = 0; i < tx_length-6; i++)
-            printw("%c", data[i+TX_DATA_OFS]);
+            text_out("%c", data[i+TX_DATA_OFS]);
         
-        printw("\n");
+       text_out("\n");
         
     
     } else
     {
     
-        printw("Unknown packet type from %d->%d\n", tx_src_node_id, tx_tar_node_id );
+        text_out("Unknown packet type from %d->%d\n", tx_src_node_id, tx_tar_node_id );
     
     }
     
@@ -148,9 +149,12 @@ void mnode_update( void )
 
 
 /* Start node */
-int mnode_start(void)
+int mnode_start(void (*out_func)(char * format, ...))
+//int mnode_start(void)
 {
-    network_start(mnode_packet, mnode_update);
+    text_out = out_func;
+          
+    network_start(mnode_packet, mnode_update, text_out);
 
      // Add system taps
   

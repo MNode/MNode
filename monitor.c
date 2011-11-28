@@ -39,7 +39,37 @@
 
 
 int main_running;
-   int row,col;				/* to store the number of rows and */
+int row,col;				/* to store the number of rows and */
+
+
+FILE *log_file = NULL;
+
+
+
+/* All output is routed through this function */
+static void text_out( char *fmt, ... )
+{
+
+    const unsigned int max = 1024;
+    char text[max];
+
+    va_list args;
+
+    va_start(args, fmt);
+
+    vsnprintf(text, max, fmt, args);
+
+    printw("%s", text);
+
+    if (log_file != NULL)
+        fprintf(log_file, "%s\n", text);
+
+    va_end(args);    
+ 
+
+}
+/* End of output function */
+
 
 
 /* Menu command - exit */
@@ -79,13 +109,13 @@ void command_nodes( void )
 
 void command_data( void )
 {
-    printw("Not implemented\n");
+    text_out("Not implemented\n");
 }
 
 
 void command_nodedata( void )
 {
-    printw("Sending Request\n");
+    text_out("Sending Request\n");
     network_datatap_poll();
 }
 
@@ -95,15 +125,15 @@ void command_nodedata( void )
 /* Menu command - help */
 void command_help( void )
 {
-    printw("Commands\n");
-    printw("exit        Quit program\n");
-    printw("ident       Send ident\n");
-    printw("send        Send string\n");
-    printw("nodes       List nodes\n");
-    printw("data        List data for this node\n");
-    printw("nodedata    List all nodedata\n");
+    text_out("Commands\n");
+    text_out("exit        Quit program\n");
+    text_out("ident       Send ident\n");
+    text_out("send        Send string\n");
+    text_out("nodes       List nodes\n");
+    text_out("data        List data for this node\n");
+    text_out("nodedata    List all nodedata\n");
     
-    printw("help        Display this message\n");
+    text_out("help        Display this message\n");
 }
 /* End of command_help */
 
@@ -112,7 +142,10 @@ void command_help( void )
 
 void draw_screen( void )
 {    
-        mvprintw(0,col/2-10,"[MNode Monitor]");
+        mvprintw(0,col/2-10,"");
+        
+        text_out("[MNode Monitor]");
+        
         mvprintw(1,0,"");
 
 
@@ -125,11 +158,14 @@ void draw_screen( void )
 int main ( void )
 {
     char  s[1000];
-    size_t len = 0;
-    int    b;
+//    size_t len = 0;
+//    int    b;
     int count = 0;
 
- 
+
+    log_file = fopen("log", "wt");
+    
+     
 	initscr();			/* Start curses mode 		  */
 
     getmaxyx(stdscr,row,col);
@@ -137,17 +173,17 @@ int main ( void )
     draw_screen();
   
  
-    printw(MODULE_NAME "Startup\n");
+    text_out(MODULE_NAME "Startup\n");
 
     main_running = 1;
 
 
-    mnode_start();
+    mnode_start(text_out);
 
+    data_tap_start( text_out);
 
     mnode_tap_add("count", DT_INT32, &count);
-
-       
+      
     while(main_running)
     {
         draw_screen();
@@ -155,6 +191,10 @@ int main ( void )
         mvprintw(row-1,0,"> ");
 
         getstr(s);
+
+
+//        clear();
+
 
         mvprintw(1,0," ");
  
@@ -172,7 +212,7 @@ int main ( void )
         if (!strcmp(s, "nodedata")) command_nodedata();        
         if (!strcmp(s, "send")) 
         {
-            printw("Message: ");
+            text_out("Message: ");
             // b =getline(&s, &len, stdin);
             getstr(s);
             command_string(s);
@@ -182,6 +222,9 @@ int main ( void )
     }
     
     mnode_stop();
+
+    fclose(log_file);
+
 
  	endwin();			/* End curses mode		  */
     

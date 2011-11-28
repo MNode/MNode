@@ -69,6 +69,10 @@ void data_tap_add(char *name,
                  void * tap_link);
 
 
+void data_tap_start(     void (*out_func)(char * format, ...) );
+
+
+
 #endif
 
 

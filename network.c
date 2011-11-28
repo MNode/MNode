@@ -74,15 +74,15 @@ void network_list_nodes( void )
 {
     node_entry *tmp = network->node_list;
     
-    printw("Node | Status\n");
+    network->text_out("Node | Status\n");
     
     while(tmp)
     {
-        printw(" [%d]    ---- \n", tmp->node_id);
+        network->text_out(" [%d]    ---- \n", tmp->node_id);
         tmp = tmp->next;
     }
     
-    printw("\n");
+    network->text_out("\n");
 }
 /* End of network_list_nodes */
 
@@ -336,7 +336,7 @@ int network_send(unsigned char *data, unsigned int length)
 
     if ((s=socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP))==-1)
     {
-        printw("socket error\n");
+        network->text_out("socket error\n");
         return MN_FAIL;
     }
    
@@ -346,20 +346,20 @@ int network_send(unsigned char *data, unsigned int length)
         
            
     status = setsockopt(s, SOL_SOCKET, SO_BROADCAST, &yes, sizeof(int) );
-    //  printw("Setsockopt Status = %d\n", status);        
+    //  network->text_out("Setsockopt Status = %d\n", status);        
         
         
     if (   inet_pton(AF_INET, BCAST_IP, (struct sockaddr *)&si_remote_temp.sin_addr) == 0 )
     {
-        printw("inet_aton() failed\n");
+        network->text_out("inet_aton() failed\n");
         return MN_FAIL;
     }
           
-    //sprintw(buf, "%s", data);
+    //snetwork->text_out(buf, "%s", data);
     
     if (sendto(s, data, length, 0, (struct sockaddr *)&si_remote_temp, slen)==-1)
     {
-        printw("Sendto fail\n");
+        network->text_out("Sendto fail\n");
         return MN_FAIL;
        
     }
@@ -381,7 +381,7 @@ void *network_thread( void *threadid )
 
     unsigned int time_count = 0;
     
-    printw(MODULE_NAME "Network Thread - Started\n");
+    network->text_out(MODULE_NAME "Network Thread - Started\n");
     
     while(network->running)
     {
@@ -404,7 +404,7 @@ void *network_thread( void *threadid )
            
             if (ret ==-1)
             {
-               printw("recvfrom fail");
+               network->text_out("recvfrom fail");
                 continue;
             }
        
@@ -427,14 +427,14 @@ void *network_thread( void *threadid )
         }   
         
         /*                        
-        printw("Data from: %s:%d\n", inet_ntoa(si_remote.sin_addr),
+        network->text_out("Data from: %s:%d\n", inet_ntoa(si_remote.sin_addr),
                                     ntohs(si_remote.sin_port));
                                    
-          printw(" %s\n", buf);*/
+          network->text_out(" %s\n", buf);*/
     }
     
    
-    printw(MODULE_NAME "Shutdown\n");
+    network->text_out(MODULE_NAME "Shutdown\n");
 
     pthread_exit(NULL); // exit thread
 }
@@ -451,7 +451,7 @@ int network_init( void )
     FILE *f = fopen("node_id", "rt");
     if (!f)
     {
-        printw("Unable to load node_id\n");
+        network->text_out("Unable to load node_id\n");
         return MN_FAIL;
     }
 
@@ -459,18 +459,18 @@ int network_init( void )
     
     if (network->node_id == 0)
     {
-        printw("node_id 0 not allowed\n");
+        network->text_out("node_id 0 not allowed\n");
         return MN_FAIL;
     }
 
-    printw("Node id: %d\n", network->node_id);
+    network->text_out("Node id: %d\n", network->node_id);
 
 
 //    int i;
     
     if ((network->server_sd=socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP))==-1)
     {
-        printw(MODULE_NAME "socket error\n");
+        network->text_out(MODULE_NAME "socket error\n");
         return MN_FAIL;
     }
     
@@ -492,13 +492,13 @@ fcntl(sock, F_SETFL, flags);*/
      if (setsockopt(network->server_sd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on)) != 0)
      {
      
-        printw(MODULE_NAME "setsockopt fail");
+        network->text_out(MODULE_NAME "setsockopt fail");
         return MN_FAIL;
      }
  
     if (bind(network->server_sd, (struct sockaddr *)&network->si_local, sizeof(network->si_local))==-1)
     {
-        printw(MODULE_NAME "bind error %d\n", errno);
+        network->text_out(MODULE_NAME "bind error %d\n", errno);
         return MN_FAIL;
     }
     
@@ -510,7 +510,9 @@ fcntl(sock, F_SETFL, flags);*/
 
 
 /* Start network layer */
-int network_start( void (*mesh_parser_link)(unsigned char *, unsigned int), void (*mesh_update)(void) )
+int network_start( void (*mesh_parser_link)(unsigned char *, unsigned int), 
+                        void (*mesh_update)(void) ,
+                            void (*out_func)(char * format, ...) )
 {
     network = (network_type *) malloc (sizeof(network_type));
     
@@ -529,10 +531,11 @@ int network_start( void (*mesh_parser_link)(unsigned char *, unsigned int), void
     // Link Parser
     network->mesh_update = mesh_update;
 
+    network->text_out= out_func;
 
     if (network_init())
     {
-        printw(MODULE_NAME "Network setup failed, operating in write-only mode\n");
+        network->text_out(MODULE_NAME "Network setup failed, operating in write-only mode\n");
         return MN_FAIL;
     }
 

@@ -36,7 +36,14 @@
 datatap_type *data_taps = NULL;
 
 
+static void (*text_out)(char * format, ...) = NULL;
 
+
+
+void data_tap_start(     void (*out_func)(char * format, ...) )
+{
+    text_out = out_func;
+}
 
 
 void data_tap_add(char *name, unsigned int tap_type, void * tap_link)
@@ -108,20 +115,20 @@ void datatap_data( unsigned int node_id,
    
 //    printf("\nNode | Tap                            | Type   | Len  |            Value\n");
    
-   printw("[Node %4d]", node_id);
+   text_out("[Node %4d]", node_id);
    
 //   for (i = 0; i < 32; i++)
-   printw("[%30s]", data+1);
+   text_out("[%30s]", data+1);
       
         
     if (tap_type == DT_INT8)
-        printw("[INT8 ][%16d]\n",   get_int8(data+1+32));
+        text_out("[INT8 ][%16d]\n",   get_int8(data+1+32));
         
     if (tap_type == DT_INT16)
-        printw("[INT16 ][%16d]\n",   get_int16(data+1+32));
+        text_out("[INT16 ][%16d]\n",   get_int16(data+1+32));
                 
     if (tap_type == DT_INT32)
-        printw("[INT32 ][%16d]\n",   get_int32(data+1+32));
+        text_out("[INT32 ][%16d]\n",   get_int32(data+1+32));
                      
         
 }

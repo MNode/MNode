@@ -70,6 +70,8 @@ typedef struct
     
     void (*mesh_update)(void);
     
+    void (*text_out)(char * format, ...);
+
 
     int running;
     
@@ -79,7 +81,12 @@ typedef struct
 
 
 int network_init( void );
-int network_start( void (*mesh_parser_link)(unsigned char *, unsigned int), void (*mesh_update)(void) );
+int network_start( void (*mesh_parser_link)(unsigned char *, unsigned int), 
+                        void (*mesh_update)(void) ,
+                            void (*out_func)(char * format, ...);
+                        
+                        
+                        );
 void network_stop( void );
 int network_send(unsigned char *data, unsigned int length);
 
