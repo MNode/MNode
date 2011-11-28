@@ -20,7 +20,7 @@
 
     Contact:    nulluser@gmail.com
                 genoce@gmail.com
-
+                
     File: MNode.c
 */
 
@@ -42,12 +42,10 @@
 #define ENABLE_CURSES 0
 
 int main_running;
-int row,col;				/* to store the number of rows and */
+int row,col; /* to store the number of rows and */
 
 
 FILE *log_file = NULL;
-
-
 WINDOW *log_win;
 
 
@@ -66,14 +64,15 @@ static void text_out( char *fmt, ... )
     vsnprintf(text, max, fmt, args);
 
     wprintw(log_win, "%s", text);
-	wrefresh(log_win);
-	
+    
+
+    
+    wrefresh(log_win);
+
     if (log_file != NULL)
         fprintf(log_file, "%s\n", text);
 
-    va_end(args);    
- 
-
+    va_end(args);
 }
 /* End of output function */
 
@@ -133,14 +132,14 @@ void command_nodedata( void )
 void command_help( void )
 {
     text_out("Commands\n");
-    text_out("exit        Quit program\n");
-    text_out("ident       Send ident\n");
-    text_out("send  text  Send text string to all stations\n");
-    text_out("nodes       List nodes\n");
-    text_out("data        List data for this node\n");
-    text_out("nodedata    List all nodedata\n");
+    text_out("exit Quit program\n");
+    text_out("ident Send ident\n");
+    text_out("send text Send text string to all stations\n");
+    text_out("nodes List nodes\n");
+    text_out("data List data for this node\n");
+    text_out("nodedata List all nodedata\n");
     
-    text_out("help        Display this message\n");
+    text_out("help Display this message\n");
 }
 /* End of command_help */
 
@@ -152,39 +151,45 @@ void command_help( void )
 /* Main */
 int main ( void )
 {
-    char  s[1000];
-//    size_t len = 0;
-//    int    b;
+    char s[1000];
     int count = 0;
 
-
     log_file = fopen("log", "wt");
-    
-     
 
-	   initscr();			/* Start curses mode 		  */
+    initscr(); /* Start curses mode */
 
-
-        
-	log_win= newwin(20, 80, 1, 0);
-
-
-	box(log_win, 0 , 0);		/* 0, 0 gives default characters 
-					 * for the vertical and horizontal
-					 * lines			*/
-	wrefresh(log_win);		/* Show that box 		*/
-
-                                               
-                      
     getmaxyx(stdscr,row,col);
  
-   
-      
+
+    start_color();			/* Start color 			*/
+
+    init_pair(1, COLOR_WHITE, COLOR_BLACK);
+    init_pair(2, COLOR_WHITE, COLOR_BLUE);
+
+    attron(COLOR_PAIR(1));
+
+    wbkgd(stdscr,COLOR_PAIR(1));
+    refresh();
+
+    log_win= newwin(row-2, col, 1, 0);
+    box(log_win, 0 , 0);
+    
+    wattron(log_win, COLOR_PAIR(2));
+    wbkgd(log_win,COLOR_PAIR(2));
+    
+    
+    idlok(log_win, 1);
+    scrollok(log_win, 1);
+    
+    
+    
+    
+    wrefresh(log_win);
+    
    
     text_out(MODULE_NAME "Startup\n");
 
     main_running = 1;
-
 
     mnode_start(text_out);
 
@@ -195,66 +200,48 @@ int main ( void )
     while(main_running)
     {
 
-  
-        mvprintw(0,col/2-10,"");
+
+        mvprintw(0,col/2-8,"");
         
         printw("[MNode Monitor]");
         
-        mvprintw(row-1,0,"> ");
+        mvprintw(row-1,0,">                                             ");
+        mvprintw(row-1,0,">");
 
-//        mvprintw(1,0,"");
+// mvprintw(1,0,"");
 
-    	refresh();	
+     refresh();
 
 
 
-        mvwprintw(log_win, 1,0,"");
-        wclear(log_win);
+       // mvwprintw(log_win, 1,0,"");
+      //  wclear(log_win);
 
         getstr(s);
       
 
-/*
-char str[] = "now # is the time for all # good men to come to the # aid of their country";
-char delims[] = "#";
-char *result = NULL;
-result = strtok( str, delims );
-while( result != NULL ) {
-    printf( "result is \"%s\"\n", result );
-    result = strtok( NULL, delims );
-}
-
-*/
-
-if (s[0] != 0)
-{
-        char delims1[] = " ";
-        char delims2[] = "\n";
-        
-        char *str = NULL;
-
-        str = strtok( s, delims1 );
-
-
-        
-        if (!strcmp(str, "exit")) command_exit();
-        if (!strcmp(str, "ident")) command_ident();
-        if (!strcmp(str, "help")) command_help();
-        if (!strcmp(str, "nodes")) command_nodes();
-        if (!strcmp(str, "data")) command_data();
-        if (!strcmp(str, "nodedata")) command_nodedata();        
-        if (!strcmp(str, "send")) 
+        if (s[0] != 0)
         {
-            str = strtok( NULL, delims2 );
-                
-            //text_out("Message: ");
-            // b =getline(&s, &len, stdin);
-//            getstr(str);
-            command_string(str);
+            char delims1[] = " ";
+           
+            char *str = NULL;
+    
+            str = strtok( s, delims1 );
+            
+            if (!strcmp(str, "exit")) command_exit();
+            if (!strcmp(str, "ident")) command_ident();
+            if (!strcmp(str, "help")) command_help();
+            if (!strcmp(str, "nodes")) command_nodes();
+            if (!strcmp(str, "data")) command_data();
+            if (!strcmp(str, "nodedata")) command_nodedata();
+            if (!strcmp(str, "send"))
+            {
+                char delims2[] = "\n";
+                str = strtok( NULL, delims2 );
+                command_string(str);
+            }
+    
         }
-
-}
-
 
         count++;
     }
@@ -263,18 +250,11 @@ if (s[0] != 0)
 
     fclose(log_file);
 
-
- 	endwin();			/* End curses mode		  */
+    endwin(); /* End curses mode */
     
     return 0;
  }
  /* End of main */
- 
- 
-
- 
- 
- 
  
  
  
