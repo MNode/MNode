@@ -339,7 +339,7 @@ int network_send(unsigned char *data, unsigned int length)
 
     if ((s=socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP))==-1)
     {
-        network->text_out("socket error\n");
+        network->text_out(MODULE_NAME "socket error\n");
         return MN_FAIL;
     }
    
@@ -354,7 +354,7 @@ int network_send(unsigned char *data, unsigned int length)
         
     if (   inet_pton(AF_INET, BCAST_IP, (struct sockaddr *)&si_remote_temp.sin_addr) == 0 )
     {
-        network->text_out("inet_aton() failed\n");
+        network->text_out(MODULE_NAME "inet_aton() failed\n");
         return MN_FAIL;
     }
           
@@ -362,7 +362,7 @@ int network_send(unsigned char *data, unsigned int length)
     
     if (sendto(s, data, length, 0, (struct sockaddr *)&si_remote_temp, slen)==-1)
     {
-        network->text_out("Sendto fail\n");
+        network->text_out(MODULE_NAME "Sendto fail\n");
         return MN_FAIL;
        
     }
@@ -407,7 +407,7 @@ void *network_thread( void *threadid )
            
             if (ret ==-1)
             {
-               network->text_out("recvfrom fail");
+               network->text_out(MODULE_NAME "recvfrom fail");
                 continue;
             }
        
@@ -454,7 +454,7 @@ int network_init( void )
     FILE *f = fopen("node_id", "rt");
     if (!f)
     {
-        network->text_out("Unable to load node_id\n");
+        network->text_out(MODULE_NAME "Unable to load node_id\n");
         return MN_FAIL;
     }
 
@@ -462,11 +462,11 @@ int network_init( void )
     
     if (network->node_id == 0)
     {
-        network->text_out("node_id 0 not allowed\n");
+        network->text_out(MODULE_NAME "node_id 0 not allowed\n");
         return MN_FAIL;
     }
 
-    network->text_out("Node id: %d\n", network->node_id);
+    network->text_out(MODULE_NAME "Node id: %d\n", network->node_id);
 
 
 //    int i;
