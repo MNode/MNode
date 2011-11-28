@@ -135,7 +135,7 @@ void command_help( void )
     text_out("Commands\n");
     text_out("exit        Quit program\n");
     text_out("ident       Send ident\n");
-    text_out("send        Send string\n");
+    text_out("send  text  Send text string to all stations\n");
     text_out("nodes       List nodes\n");
     text_out("data        List data for this node\n");
     text_out("nodedata    List all nodedata\n");
@@ -214,21 +214,47 @@ int main ( void )
         getstr(s);
       
 
+/*
+char str[] = "now # is the time for all # good men to come to the # aid of their country";
+char delims[] = "#";
+char *result = NULL;
+result = strtok( str, delims );
+while( result != NULL ) {
+    printf( "result is \"%s\"\n", result );
+    result = strtok( NULL, delims );
+}
+
+*/
+
+if (s[0] != 0)
+{
+        char delims1[] = " ";
+        char delims2[] = "\n";
+        
+        char *str = NULL;
+
+        str = strtok( s, delims1 );
+
 
         
-        if (!strcmp(s, "exit")) command_exit();
-        if (!strcmp(s, "ident")) command_ident();
-        if (!strcmp(s, "help")) command_help();
-        if (!strcmp(s, "nodes")) command_nodes();
-        if (!strcmp(s, "data")) command_data();
-        if (!strcmp(s, "nodedata")) command_nodedata();        
-        if (!strcmp(s, "send")) 
+        if (!strcmp(str, "exit")) command_exit();
+        if (!strcmp(str, "ident")) command_ident();
+        if (!strcmp(str, "help")) command_help();
+        if (!strcmp(str, "nodes")) command_nodes();
+        if (!strcmp(str, "data")) command_data();
+        if (!strcmp(str, "nodedata")) command_nodedata();        
+        if (!strcmp(str, "send")) 
         {
-            text_out("Message: ");
+            str = strtok( NULL, delims2 );
+                
+            //text_out("Message: ");
             // b =getline(&s, &len, stdin);
-            getstr(s);
-            command_string(s);
+//            getstr(str);
+            command_string(str);
         }
+
+}
+
 
         count++;
     }

@@ -104,11 +104,11 @@ void mnode_packet(unsigned char *data, unsigned int length)
 
     if (tx_type == ID_STRING)
     {
-   
+       unsigned int string_len = tx_length - TX_DATA_OFS;
     
         text_out("[Node %d->%d] STRING: ", tx_src_node_id, tx_tar_node_id );
         
-        for (i = 0; i < tx_length-6; i++)
+        for (i = 0; i < string_len; i++)
             text_out("%c", data[i+TX_DATA_OFS]);
         
        text_out("\n");

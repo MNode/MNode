@@ -185,11 +185,14 @@ void network_identrq (void )
 void network_string (unsigned char *s )
 {
     unsigned char buffer[256];
-    unsigned int length = strlen((char *)s) + TX_DATA_OFS;
-
+    unsigned int length;
     unsigned int target_node_id = 0;
-
     unsigned int i = 0;
+
+    if (s == NULL) return;      // do not send zero length string
+
+    length = strlen((char *)s) + TX_DATA_OFS;
+
 
     buffer[i++] = length >> 8;
     buffer[i++] = length &  0xff;
