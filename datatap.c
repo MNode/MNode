@@ -108,20 +108,20 @@ void datatap_data( unsigned int node_id,
    
 //    printf("\nNode | Tap                            | Type   | Len  |            Value\n");
    
-   printf("[Node %4d]", node_id);
+   printw("[Node %4d]", node_id);
    
 //   for (i = 0; i < 32; i++)
-   printf("[%30s]", data+1);
+   printw("[%30s]", data+1);
       
         
     if (tap_type == DT_INT8)
-        printf("[INT8 ][%16d]\n",   get_int8(data+1+32));
+        printw("[INT8 ][%16d]\n",   get_int8(data+1+32));
         
     if (tap_type == DT_INT16)
-        printf("[INT16 ][%16d]\n",   get_int16(data+1+32));
+        printw("[INT16 ][%16d]\n",   get_int16(data+1+32));
                 
     if (tap_type == DT_INT32)
-        printf("[INT32 ][%16d]\n",   get_int32(data+1+32));
+        printw("[INT32 ][%16d]\n",   get_int32(data+1+32));
                      
         
 }

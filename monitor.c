@@ -28,6 +28,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
+#include <ncurses.h>
 
 
 #include "mnode.h"
@@ -38,6 +39,7 @@
 
 
 int main_running;
+   int row,col;				/* to store the number of rows and */
 
 
 /* Menu command - exit */
@@ -77,13 +79,13 @@ void command_nodes( void )
 
 void command_data( void )
 {
-    printf("Not implemented\n");
+    printw("Not implemented\n");
 }
 
 
 void command_nodedata( void )
 {
-    printf("Sending Request\n");
+    printw("Sending Request\n");
     network_datatap_poll();
 }
 
@@ -93,30 +95,49 @@ void command_nodedata( void )
 /* Menu command - help */
 void command_help( void )
 {
-    printf("Commands\n");
-    printf("exit        Quit program\n");
-    printf("ident       Send ident\n");
-    printf("send        Send string\n");
-    printf("nodes       List nodes\n");
-    printf("data        List data for this node\n");
-    printf("nodedata    List all nodedata\n");
+    printw("Commands\n");
+    printw("exit        Quit program\n");
+    printw("ident       Send ident\n");
+    printw("send        Send string\n");
+    printw("nodes       List nodes\n");
+    printw("data        List data for this node\n");
+    printw("nodedata    List all nodedata\n");
     
-    printf("help        Display this message\n");
+    printw("help        Display this message\n");
 }
 /* End of command_help */
 
 
 
 
+void draw_screen( void )
+{    
+        mvprintw(0,col/2-10,"[MNode Monitor]");
+        mvprintw(1,0,"");
+
+
+    	refresh();	
+}
+
+
+
 /* Main */
 int main ( void )
 {
-    char  *s;
+    char  s[1000];
     size_t len = 0;
     int    b;
     int count = 0;
 
-    printf(MODULE_NAME "Startup\n");
+ 
+	initscr();			/* Start curses mode 		  */
+
+    getmaxyx(stdscr,row,col);
+ 
+    draw_screen();
+  
+ 
+    printw(MODULE_NAME "Startup\n");
 
     main_running = 1;
 
@@ -124,20 +145,23 @@ int main ( void )
     mnode_start();
 
 
-
     mnode_tap_add("count", DT_INT32, &count);
-
-
-
 
        
     while(main_running)
     {
-        printf(">");
+        draw_screen();
 
-        b = getline(&s, &len, stdin);
+        mvprintw(row-1,0,"> ");
+
+        getstr(s);
+
+        mvprintw(1,0," ");
+ 
+
+        //b = getline(&s, &len, stdin);
                 
-        if (0 < b) s[b-1] = 0; // Erase netline
+//        if (0 < b) s[b-1] = 0; // Erase newline
         
         
         if (!strcmp(s, "exit")) command_exit();
@@ -148,29 +172,25 @@ int main ( void )
         if (!strcmp(s, "nodedata")) command_nodedata();        
         if (!strcmp(s, "send")) 
         {
-        printf("Message: ");
-         b = getline(&s, &len, stdin);
-        command_string(s);
-        
+            printw("Message: ");
+            // b =getline(&s, &len, stdin);
+            getstr(s);
+            command_string(s);
         }
 
         count++;
-
     }
     
     mnode_stop();
+
+ 	endwin();			/* End curses mode		  */
     
     return 0;
  }
  /* End of main */
  
  
- 
- 
- 
- 
- 
- 
+
  
  
  

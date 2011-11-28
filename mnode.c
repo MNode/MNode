@@ -66,36 +66,36 @@ void mnode_packet(unsigned char *data, unsigned int length)
  //   unsigned int tx_checksum = data[7];
 
 
-/*    printf("\nMesh packet\n");
-    printf(" Length: %d\n", tx_length);
-    printf(" Node: %d\n", tx_node);
-    printf(" Type: %d\n", tx_type);
-    printf(" Checksum: %d\n", tx_checksum);*/
+/*    printw("\nMesh packet\n");
+    printw(" Length: %d\n", tx_length);
+    printw(" Node: %d\n", tx_node);
+    printw(" Type: %d\n", tx_type);
+    printw(" Checksum: %d\n", tx_checksum);*/
     
     
     if (tx_type == ID_IDENT)
     {
         if (network_add_node(tx_src_node_id) == 0)       // Add to node list
-            printf("[Node %d->%d] IDENT\n", tx_src_node_id, tx_tar_node_id ); // display if new
+            printw("[Node %d->%d] IDENT\n", tx_src_node_id, tx_tar_node_id ); // display if new
             
     } else
     
     if (tx_type == ID_IDENTRQ)
     {
-       // printf("[Node %d->%d] IDENTQR\n", tx_src_node_id, tx_tar_node_id );
+       // printw("[Node %d->%d] IDENTQR\n", tx_src_node_id, tx_tar_node_id );
         network_ident();
     } else
 
 
     if (tx_type == ID_DTPOLL)
     {
-        //printf("[Node %d->%d] DTPOLL\n", tx_src_node_id, tx_tar_node_id );
+        //printw("[Node %d->%d] DTPOLL\n", tx_src_node_id, tx_tar_node_id );
         datatap_poll();
     } else
 
     if (tx_type == ID_DTDATA)
     {
-       // printf("[Node %d->%d] DTDATA\n", tx_src_node_id, tx_tar_node_id );
+       // printw("[Node %d->%d] DTDATA\n", tx_src_node_id, tx_tar_node_id );
      
        datatap_data(tx_src_node_id, data + TX_DATA_OFS, length-TX_DATA_OFS);
         
@@ -105,18 +105,18 @@ void mnode_packet(unsigned char *data, unsigned int length)
     {
    
     
-        printf("[Node %d->%d] STRING: ", tx_src_node_id, tx_tar_node_id );
+        printw("[Node %d->%d] STRING: ", tx_src_node_id, tx_tar_node_id );
         
         for (i = 0; i < tx_length-6; i++)
-            printf("%c", data[i+TX_DATA_OFS]);
+            printw("%c", data[i+TX_DATA_OFS]);
         
-        printf("\n");
+        printw("\n");
         
     
     } else
     {
     
-        printf("Unknown packet type from %d->%d\n", tx_src_node_id, tx_tar_node_id );
+        printw("Unknown packet type from %d->%d\n", tx_src_node_id, tx_tar_node_id );
     
     }
     
@@ -133,7 +133,7 @@ void mnode_packet(unsigned char *data, unsigned int length)
 /* Called by networking code every second */
 void mnode_update( void )
 {
-    //printf("Update\n");
+    //printw("Update\n");
 
     struct sysinfo si;
     sysinfo(&si);

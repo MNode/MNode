@@ -74,15 +74,15 @@ void network_list_nodes( void )
 {
     node_entry *tmp = network->node_list;
     
-    printf("Node | Status\n");
+    printw("Node | Status\n");
     
     while(tmp)
     {
-        printf(" [%d]    ---- \n", tmp->node_id);
+        printw(" [%d]    ---- \n", tmp->node_id);
         tmp = tmp->next;
     }
     
-    printf("\n");
+    printw("\n");
 }
 /* End of network_list_nodes */
 
@@ -336,7 +336,7 @@ int network_send(unsigned char *data, unsigned int length)
 
     if ((s=socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP))==-1)
     {
-        printf("socket error\n");
+        printw("socket error\n");
         return MN_FAIL;
     }
    
@@ -346,20 +346,20 @@ int network_send(unsigned char *data, unsigned int length)
         
            
     status = setsockopt(s, SOL_SOCKET, SO_BROADCAST, &yes, sizeof(int) );
-    //  printf("Setsockopt Status = %d\n", status);        
+    //  printw("Setsockopt Status = %d\n", status);        
         
         
     if (   inet_pton(AF_INET, BCAST_IP, (struct sockaddr *)&si_remote_temp.sin_addr) == 0 )
     {
-        fprintf(stderr, "inet_aton() failed\n");
+        printw("inet_aton() failed\n");
         return MN_FAIL;
     }
           
-    //sprintf(buf, "%s", data);
+    //sprintw(buf, "%s", data);
     
     if (sendto(s, data, length, 0, (struct sockaddr *)&si_remote_temp, slen)==-1)
     {
-        printf("Sendto fail\n");
+        printw("Sendto fail\n");
         return MN_FAIL;
        
     }
@@ -381,7 +381,7 @@ void *network_thread( void *threadid )
 
     unsigned int time_count = 0;
     
-    printf(MODULE_NAME "Network Thread - Started\n");
+    printw(MODULE_NAME "Network Thread - Started\n");
     
     while(network->running)
     {
@@ -404,7 +404,7 @@ void *network_thread( void *threadid )
            
             if (ret ==-1)
             {
-               printf("recvfrom fail");
+               printw("recvfrom fail");
                 continue;
             }
        
@@ -427,14 +427,14 @@ void *network_thread( void *threadid )
         }   
         
         /*                        
-        printf("Data from: %s:%d\n", inet_ntoa(si_remote.sin_addr),
+        printw("Data from: %s:%d\n", inet_ntoa(si_remote.sin_addr),
                                     ntohs(si_remote.sin_port));
                                    
-          printf(" %s\n", buf);*/
+          printw(" %s\n", buf);*/
     }
     
    
-    printf(MODULE_NAME "Shutdown\n");
+    printw(MODULE_NAME "Shutdown\n");
 
     pthread_exit(NULL); // exit thread
 }
@@ -451,7 +451,7 @@ int network_init( void )
     FILE *f = fopen("node_id", "rt");
     if (!f)
     {
-        printf("Unable to load node_id\n");
+        printw("Unable to load node_id\n");
         return MN_FAIL;
     }
 
@@ -459,18 +459,18 @@ int network_init( void )
     
     if (network->node_id == 0)
     {
-        printf("node_id 0 not allowed\n");
+        printw("node_id 0 not allowed\n");
         return MN_FAIL;
     }
 
-    printf("Node id: %d\n", network->node_id);
+    printw("Node id: %d\n", network->node_id);
 
 
 //    int i;
     
     if ((network->server_sd=socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP))==-1)
     {
-        printf(MODULE_NAME "socket error\n");
+        printw(MODULE_NAME "socket error\n");
         return MN_FAIL;
     }
     
@@ -492,13 +492,13 @@ fcntl(sock, F_SETFL, flags);*/
      if (setsockopt(network->server_sd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on)) != 0)
      {
      
-        printf(MODULE_NAME "setsockopt fail");
+        printw(MODULE_NAME "setsockopt fail");
         return MN_FAIL;
      }
  
     if (bind(network->server_sd, (struct sockaddr *)&network->si_local, sizeof(network->si_local))==-1)
     {
-        printf(MODULE_NAME "bind error %d\n", errno);
+        printw(MODULE_NAME "bind error %d\n", errno);
         return MN_FAIL;
     }
     
@@ -532,7 +532,7 @@ int network_start( void (*mesh_parser_link)(unsigned char *, unsigned int), void
 
     if (network_init())
     {
-        printf(MODULE_NAME "Network setup failed, operating in write-only mode\n");
+        printw(MODULE_NAME "Network setup failed, operating in write-only mode\n");
         return MN_FAIL;
     }
 

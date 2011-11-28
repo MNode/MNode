@@ -3,7 +3,7 @@
 #
 
 CFLAGS=-O4 -Wall
-LIBS=-l pthread
+LIBS=-l pthread -l ncurses
 EXE=bin/monitor
 UI=bin/mnodemon
 
