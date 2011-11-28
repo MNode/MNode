@@ -38,11 +38,17 @@
 #define MODULE_NAME "[Monitor] "
 
 
+
+#define ENABLE_CURSES 0
+
 int main_running;
 int row,col;				/* to store the number of rows and */
 
 
 FILE *log_file = NULL;
+
+
+WINDOW *log_win;
 
 
 
@@ -59,8 +65,9 @@ static void text_out( char *fmt, ... )
 
     vsnprintf(text, max, fmt, args);
 
-    printw("%s", text);
-
+    wprintw(log_win, "%s", text);
+	wrefresh(log_win);
+	
     if (log_file != NULL)
         fprintf(log_file, "%s\n", text);
 
@@ -140,18 +147,6 @@ void command_help( void )
 
 
 
-void draw_screen( void )
-{    
-        mvprintw(0,col/2-10,"");
-        
-        text_out("[MNode Monitor]");
-        
-        mvprintw(1,0,"");
-
-
-    	refresh();	
-}
-
 
 
 /* Main */
@@ -166,13 +161,26 @@ int main ( void )
     log_file = fopen("log", "wt");
     
      
-	initscr();			/* Start curses mode 		  */
 
+	   initscr();			/* Start curses mode 		  */
+
+
+        
+	log_win= newwin(20, 80, 1, 0);
+
+
+	box(log_win, 0 , 0);		/* 0, 0 gives default characters 
+					 * for the vertical and horizontal
+					 * lines			*/
+	wrefresh(log_win);		/* Show that box 		*/
+
+                                               
+                      
     getmaxyx(stdscr,row,col);
  
-    draw_screen();
-  
- 
+   
+      
+   
     text_out(MODULE_NAME "Startup\n");
 
     main_running = 1;
@@ -186,23 +194,27 @@ int main ( void )
       
     while(main_running)
     {
-        draw_screen();
 
+  
+        mvprintw(0,col/2-10,"");
+        
+        printw("[MNode Monitor]");
+        
         mvprintw(row-1,0,"> ");
 
+//        mvprintw(1,0,"");
+
+    	refresh();	
+
+
+
+        mvwprintw(log_win, 1,0,"");
+        wclear(log_win);
+
         getstr(s);
+      
 
 
-//        clear();
-
-
-        mvprintw(1,0," ");
- 
-
-        //b = getline(&s, &len, stdin);
-                
-//        if (0 < b) s[b-1] = 0; // Erase newline
-        
         
         if (!strcmp(s, "exit")) command_exit();
         if (!strcmp(s, "ident")) command_ident();
