@@ -42,16 +42,45 @@
 #define ENABLE_CURSES 0
 
 int main_running;
-int row,col; /* to store the number of rows and */
+int screen_x;
+int screen_y;
+int count = 0;          // Global var for datatap linking
+
 
 
 FILE *log_file = NULL;
-WINDOW *log_win;
+WINDOW *log_win = NULL;
+WINDOW *log_win_area = NULL;
 
 
+int log_win_setup( void )
+{
+    int x_pos = 0;
+    int y_pos = 1;
+    
+    int x_size = screen_x;
+    int y_size = screen_y - 3;
+        
+    log_win = newwin(y_size,x_size, y_pos, x_pos);
+    box(log_win, 0 , 0);
+    wattron(log_win, COLOR_PAIR(2));
+    wbkgd(log_win,COLOR_PAIR(2));
+    wrefresh(log_win);
+
+    log_win_area = newwin(y_size-2, x_size-2, y_pos+1, x_pos+1);
+    wattron(log_win_area, COLOR_PAIR(2));
+    wbkgd(log_win_area,COLOR_PAIR(2));
+    idlok(log_win_area, 1);
+    scrollok(log_win_area, 1);
+    
+    wrefresh(log_win_area);
+
+   
+    return MN_SUCCESS;
+}
 
 /* All output is routed through this function */
-static void text_out( char *fmt, ... )
+static void log_out( char *fmt, ... )
 {
 
     const unsigned int max = 1024;
@@ -63,11 +92,18 @@ static void text_out( char *fmt, ... )
 
     vsnprintf(text, max, fmt, args);
 
-    wprintw(log_win, "%s", text);
-    
+    wprintw(log_win_area, "%s", text);
+
 
     
-    wrefresh(log_win);
+    wrefresh(log_win_area);
+
+
+    // Move curser back home
+    mvprintw(screen_y-1,0,"> ");
+
+    refresh();
+
 
     if (log_file != NULL)
         fprintf(log_file, "%s\n", text);
@@ -115,13 +151,13 @@ void command_nodes( void )
 
 void command_data( void )
 {
-    text_out("Not implemented\n");
+    log_out("Not implemented\n");
 }
 
 
 void command_nodedata( void )
 {
-    text_out("Sending Request\n");
+    log_out("Sending Request\n");
     network_datatap_poll();
 }
 
@@ -131,37 +167,30 @@ void command_nodedata( void )
 /* Menu command - help */
 void command_help( void )
 {
-    text_out("Commands\n");
-    text_out("exit Quit program\n");
-    text_out("ident Send ident\n");
-    text_out("send text Send text string to all stations\n");
-    text_out("nodes List nodes\n");
-    text_out("data List data for this node\n");
-    text_out("nodedata List all nodedata\n");
+    log_out("Commands\n");
+    log_out("  exit          Quit program\n");
+    log_out("  ident         Send ident\n");
+    log_out("  send text     Send text string to all stations\n");
+    log_out("  nodes         List nodes\n");
+    log_out("  data          List data for this node\n");
+    log_out("  nodedata      Query all nodedata\n");
     
-    text_out("help Display this message\n");
+    log_out("  help          Display this message\n");
 }
 /* End of command_help */
 
 
 
-
-
-
-/* Main */
-int main ( void )
+void monitor_start( void )
 {
-    char s[1000];
-    int count = 0;
 
     log_file = fopen("log", "wt");
 
     initscr(); /* Start curses mode */
 
-    getmaxyx(stdscr,row,col);
+    getmaxyx(stdscr,screen_y,screen_x);
  
-
-    start_color();			/* Start color 			*/
+    start_color();		
 
     init_pair(1, COLOR_WHITE, COLOR_BLACK);
     init_pair(2, COLOR_WHITE, COLOR_BLUE);
@@ -170,55 +199,64 @@ int main ( void )
 
     wbkgd(stdscr,COLOR_PAIR(1));
     refresh();
+    
+      
+    log_win_setup();
 
-    log_win= newwin(row-2, col, 1, 0);
-    box(log_win, 0 , 0);
-    
-    wattron(log_win, COLOR_PAIR(2));
-    wbkgd(log_win,COLOR_PAIR(2));
-    
-    
-    idlok(log_win, 1);
-    scrollok(log_win, 1);
-    
-    
-    
-    
-    wrefresh(log_win);
-    
-   
-    text_out(MODULE_NAME "Startup\n");
+    log_out(MODULE_NAME "Startup\n");
 
     main_running = 1;
 
-    mnode_start(text_out);
+    mnode_start(log_out);
 
-    data_tap_start( text_out);
+    data_tap_start(log_out);
 
     mnode_tap_add("count", DT_INT32, &count);
-      
+}
+
+
+void monitor_stop( void )
+{
+    mnode_stop();
+
+    fclose(log_file);
+
+    endwin(); /* End curses mode */
+}
+
+
+
+
+/* Main */
+int main ( void )
+{
+    char s[1000];
+
+  
+  
+    monitor_start();
+    
+
+    
     while(main_running)
     {
 
 
-        mvprintw(0,col/2-8,"");
+        mvprintw(0,screen_x/2-8,"");
         
         printw("[MNode Monitor]");
         
-        mvprintw(row-1,0,">                                             ");
-        mvprintw(row-1,0,">");
+        mvprintw(screen_y-1,0,">                                             ");
+        mvprintw(screen_y-1,0,"> ");
 
-// mvprintw(1,0,"");
+        // mvprintw(1,0,"");
 
-     refresh();
-
-
+         refresh();
 
        // mvwprintw(log_win, 1,0,"");
       //  wclear(log_win);
 
         getstr(s);
-      
 
         if (s[0] != 0)
         {
@@ -228,17 +266,20 @@ int main ( void )
     
             str = strtok( s, delims1 );
             
-            if (!strcmp(str, "exit")) command_exit();
-            if (!strcmp(str, "ident")) command_ident();
-            if (!strcmp(str, "help")) command_help();
-            if (!strcmp(str, "nodes")) command_nodes();
-            if (!strcmp(str, "data")) command_data();
-            if (!strcmp(str, "nodedata")) command_nodedata();
+            if (!strcmp(str, "exit")) command_exit(); else
+            if (!strcmp(str, "ident")) command_ident();else
+            if (!strcmp(str, "help")) command_help();else
+            if (!strcmp(str, "nodes")) command_nodes();else
+            if (!strcmp(str, "data")) command_data();else
+            if (!strcmp(str, "nodedata")) command_nodedata();else
             if (!strcmp(str, "send"))
             {
                 char delims2[] = "\n";
                 str = strtok( NULL, delims2 );
                 command_string(str);
+            } else
+            {
+                log_out("%s: Command not found\n", str);
             }
     
         }
@@ -246,11 +287,8 @@ int main ( void )
         count++;
     }
     
-    mnode_stop();
+    monitor_stop();
 
-    fclose(log_file);
-
-    endwin(); /* End curses mode */
     
     return 0;
  }

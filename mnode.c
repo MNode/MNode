@@ -77,7 +77,7 @@ void mnode_packet(unsigned char *data, unsigned int length)
     if (tx_type == ID_IDENT)
     {
         if (network_add_node(tx_src_node_id) == 0)       // Add to node list
-            text_out("[Node %d->%d] IDENT\n", tx_src_node_id, tx_tar_node_id ); // display if new
+            text_out(MODULE_NAME "Node %d->%d IDENT\n", tx_src_node_id, tx_tar_node_id ); // display if new
             
     } else
     
@@ -106,7 +106,7 @@ void mnode_packet(unsigned char *data, unsigned int length)
     {
        unsigned int string_len = tx_length - TX_DATA_OFS;
     
-        text_out("[Node %d->%d] STRING: ", tx_src_node_id, tx_tar_node_id );
+        text_out(MODULE_NAME "Node %d->%d STRING: ", tx_src_node_id, tx_tar_node_id );
         
         for (i = 0; i < string_len; i++)
             text_out("%c", data[i+TX_DATA_OFS]);
@@ -117,7 +117,7 @@ void mnode_packet(unsigned char *data, unsigned int length)
     } else
     {
     
-        text_out("Unknown packet type from %d->%d\n", tx_src_node_id, tx_tar_node_id );
+        text_out(MODULE_NAME "Unknown packet type from %d->%d\n", tx_src_node_id, tx_tar_node_id );
     
     }
     
