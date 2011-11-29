@@ -29,6 +29,10 @@
 #ifndef MNODE_H
 #define MNODE_H
 
+
+
+#include "types.h"
+#include "datatap.h"
 #include "network.h"
 
 #define MN_SUCCESS      0
@@ -38,8 +42,10 @@
 #define STATE_LENGTH    1
 #define STATE_DATA      2
 
+//typedef struct network_type network_type;
+//typedef struct mnode_type mnode_type;
 
-typedef struct 
+struct mnode_type
 {
     // system datataps  
     unsigned int local_freeram;
@@ -49,7 +55,7 @@ typedef struct
     
    network_type * network;         // All Network Data
 
-} mnode_type;
+};
 
 
 int mnode_start(void (*out_func)(char * format, ...));

@@ -33,8 +33,6 @@
 #include <pthread.h>
 #include <errno.h>
 
-#include "datatap.h"
-#include "mnode.h"
 #include "network.h"
 
 

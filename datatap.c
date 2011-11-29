@@ -24,20 +24,18 @@
     File: datatap.c
 */
 
-
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
 
 
+
 #include "datatap.h"
-//#include "network.h"
+
 
 datatap_type *data_taps = NULL;
 
-
 static void (*text_out)(char * format, ...) = NULL;
-
 
 
 void data_tap_start(     void (*out_func)(char * format, ...) )

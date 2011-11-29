@@ -32,24 +32,12 @@
 #include <unistd.h>
 #include <sys/sysinfo.h>
 
+
+
 #include "mnode.h"
-#include "datatap.h"
-#include "network.h"
-
-
-
 
 
 mnode_type *mnode;
-
-
-
-
-// system datataps  
-//unsigned int local_freeram;
-//unsigned int local_procs;
-//void (*text_out)(char * format, ...) = NULL;
-
 
 
 
@@ -64,15 +52,10 @@ unsigned int get_word(unsigned char * b)
 /* All network traffic is router through here */
 void mnode_packet(unsigned char *data, unsigned int length)
 {
-
-
-
-
-
     unsigned int i;
-    unsigned int tx_length   = get_word(data);//data[0]*256+data[1];
-    unsigned int tx_src_node_id     = get_word(data+2);//data[2]*256+data[3];
-    unsigned int tx_tar_node_id     = get_word(data+4);//data[2]*256+data[3];
+    unsigned int tx_length          = get_word(data);
+    unsigned int tx_src_node_id     = get_word(data+2);
+    unsigned int tx_tar_node_id     = get_word(data+4);
     
     unsigned int tx_type     = data[6];
  //   unsigned int tx_checksum = data[7];
@@ -84,17 +67,12 @@ void mnode_packet(unsigned char *data, unsigned int length)
     printw(" Type: %d\n", tx_type);
     printw(" Checksum: %d\n", tx_checksum);*/
     
-    
-    
-    
     if (tx_type == ID_IDENT)
     {
         mnode->text_out(MODULE_NAME "ID_IDENT\n");
     
         if (network_add_node(mnode->network, tx_src_node_id) == 0)       // Add to node list
-          ;//  mnode->text_out(MODULE_NAME "Node %d->%d IDENT\n", tx_src_node_id, tx_tar_node_id ); // display if new
-            
-        
+            mnode->text_out(MODULE_NAME "Node %d->%d IDENT\n", tx_src_node_id, tx_tar_node_id ); // display if new
         
 
     } else

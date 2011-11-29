@@ -31,10 +31,10 @@
 #include <unistd.h>
 #include <ncurses.h>
 
+#include "types.h"
 #include "mnode.h"
-#include "datatap.h"
 #include "network.h"
-
+#include "datatap.h"
 
 int main_running;
 int screen_x;

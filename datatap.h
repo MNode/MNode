@@ -29,8 +29,10 @@
 #ifndef DATATAP_H
 #define DATATAP_H
 
-#include "network.h"
 
+#include "types.h"
+#include "mnode.h"
+#include "network.h"
 
 #define DT_INT8     1
 #define DT_INT16    2
@@ -38,7 +40,7 @@
 #define DT_STRING   4
 
 
-typedef struct datatap_type
+struct datatap_type
 {
     char tap_name[32];
 
@@ -52,11 +54,10 @@ typedef struct datatap_type
     struct datatap_type *next;
         
 
-}datatap_type;
+};
 
 
 /* Respond to poll request */
-//void datatap_poll( void );
 
 
 void datatap_poll( network_type *n );

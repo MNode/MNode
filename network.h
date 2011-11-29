@@ -27,10 +27,14 @@
 #ifndef NETWORK_H
 #define NETWORK_H
 
+
 #include <pthread.h>
 #include <arpa/inet.h>
 
 
+#include "types.h"
+#include "mnode.h"
+#include "datatap.h"
 
 
 #define BUFLEN 4096 
@@ -51,14 +55,18 @@
 
 
 /* Node entry */
-typedef struct node_entry
+struct node_entry
 {
     unsigned int node_id;
     struct node_entry *next;
-} node_entry;
+};
 
 
-typedef struct
+
+//typedef struct mnode_type;
+
+
+struct network_type
 {
     int server_sd;              // server socket
 
@@ -76,8 +84,12 @@ typedef struct
     int running;
     
     node_entry *node_list; // Node list
+    
+    
+    mnode_type *mnode;
+    
 
-} network_type;
+};
 
 
 int network_init( network_type *n );
