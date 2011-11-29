@@ -102,7 +102,7 @@ void data_tap_send(network_type *n, datatap_type *dt )
         buffer[i++] = value & 0xff;
     }
     
-    network_broadcast ( n, ID_DTDATA, buffer, i);
+    network_packet( n, ID_DTDATA, buffer, i);
 
 }
 

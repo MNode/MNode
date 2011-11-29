@@ -97,10 +97,10 @@ void network_list_nodes( network_type *n );
 void network_free_nodes( network_type *n );
 
 void network_datatap_poll ( network_type *n);
-//void network_datatap_data ( network_type *n, datatap_type *d);
 
 
-void network_broadcast ( network_type *n, 
+
+void network_packet ( network_type *n, 
                          unsigned char packet_type, 
                          unsigned char *data,
                          unsigned int data_length);

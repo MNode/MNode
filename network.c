@@ -117,7 +117,7 @@ unsigned int get_checksum ( unsigned char *buff, unsigned int len )
 /* Send IDENT packet */
 void network_ident ( network_type *n )
 {
-    unsigned char buffer[100];
+   /* unsigned char buffer[100];
 
     unsigned int length = TX_DATA_OFS;
 
@@ -138,7 +138,11 @@ void network_ident ( network_type *n )
     
     buffer[TX_DATA_OFS-1] = get_checksum(buffer, length);
    
-    network_send(n, buffer, length);
+    network_send(n, buffer, length);*/
+    
+    
+      network_packet ( n, ID_IDENT, NULL, 0); 
+    
 
 }
 /* End of network_ident */
@@ -147,7 +151,7 @@ void network_ident ( network_type *n )
 /* Send IDENT packet */
 void network_identrq ( network_type *n )
 {
-    unsigned char buffer[100];
+/*    unsigned char buffer[100];
 
     unsigned int length = TX_DATA_OFS;
 
@@ -168,7 +172,10 @@ void network_identrq ( network_type *n )
     
     buffer[TX_DATA_OFS-1] = get_checksum(buffer, length);
    
-    network_send(n, buffer, length);
+    network_send(n, buffer, length);*/
+    
+    
+       network_packet ( n, ID_IDENTRQ, NULL, 0);
 
 }
 /* End of network_ident */
@@ -177,36 +184,13 @@ void network_identrq ( network_type *n )
 /* Send string packet */
 void network_string ( network_type *n, unsigned char *s )
 {
-    unsigned char buffer[256];
     unsigned int length;
-    unsigned int target_node_id = 0;
-    unsigned int i = 0;
 
     if (s == NULL) return;      // do not send zero length string
 
-    length = strlen((char *)s) + TX_DATA_OFS;
-
-
-    buffer[i++] = length >> 8;
-    buffer[i++] = length &  0xff;
-
-    buffer[i++] = n->node_id >> 8;
-    buffer[i++] = n->node_id &  0xff;
-    
-    buffer[i++] = target_node_id >> 8;
-    buffer[i++] = target_node_id &  0xff;
+    length = strlen((char *)s); 
         
-    buffer[i++] = ID_STRING;
-    buffer[i++] = 0; // No checksum for now
-   
-    strcpy((char*)(buffer + TX_DATA_OFS), (char *)s);
-   
-    buffer[length] = 0;
-      
-    // COmpute checksum  
-    buffer[TX_DATA_OFS-1] = get_checksum(buffer, length); 
-                 
-    network_send(n, buffer, length);
+    network_packet ( n, ID_STRING, s, length);    
 }
 /* End of network_string */
 
@@ -214,28 +198,7 @@ void network_string ( network_type *n, unsigned char *s )
 /* Send IDENT packet */
 void network_datatap_poll ( network_type *n )
 {
-    unsigned char buffer[100];
-
-    unsigned int length = TX_DATA_OFS;
-
-    unsigned int i = 0;
-    
-    buffer[i++] = length >> 8;
-    buffer[i++] = length &  0xff;
-
-    buffer[i++] = n->node_id >> 8;
-    buffer[i++] = n->node_id &  0xff;
-
-    buffer[i++] = 0;//node_id >> 8;
-    buffer[i++] = 0;//node_id &  0xff;
-
-
-    buffer[i++] = ID_DTPOLL;
-    buffer[i++] = 0;  // No checksum for now
-    
-    buffer[TX_DATA_OFS-1] = get_checksum(buffer, length);
-   
-    network_send(n, buffer, length);
+    network_packet ( n, ID_DTPOLL, NULL, 0);
 
 }
 /* End of network_ident */
@@ -245,7 +208,7 @@ void network_datatap_poll ( network_type *n )
 
 
 /* Send IDENT packet */
-void network_broadcast ( network_type *n, 
+void network_packet ( network_type *n, 
                          unsigned char packet_type, 
                          unsigned char *data,
                          unsigned int data_length )
@@ -269,7 +232,7 @@ void network_broadcast ( network_type *n,
 
     buffer[i++] = packet_type;
     
-   buffer[i++] = 0;  // No checksum for now
+    buffer[i++] = 0;  // No checksum for now
     
 
     int j = 0;
@@ -286,75 +249,6 @@ void network_broadcast ( network_type *n,
 
 
 
-
-
-
-/* Send IDENT packet */
-void network_datatap_data ( network_type *n, datatap_type *dt )
-{
-    /*unsigned char buffer[100];
-
-    unsigned int length = TX_DATA_OFS + 1  +32;
-
-    if (dt->tap_type == DT_INT8) length += 1;
-    if (dt->tap_type == DT_INT16) length += 2;
-    if (dt->tap_type == DT_INT32) length += 4;
-
-
-    unsigned int i = 0;
-    
-    
-    buffer[i++] = length >> 8;
-    buffer[i++] = length &  0xff;
-
-    buffer[i++] = n->node_id >> 8;
-    buffer[i++] = n->node_id &  0xff;
-
-    buffer[i++] = 0;//node_id >> 8;
-    buffer[i++] = 0;//node_id &  0xff;
-
-
-    buffer[i++] = ID_DTDATA;
-    
-        buffer[i++] = 0;  // No checksum for now
-    
-    buffer[i++] = dt->tap_type;  // No checksum for now
-    
-      
-    // Copy over tap name
-    memset(buffer+i, 0, 32);
-   strcpy((char *)(buffer+i), dt->tap_name);
-    i+=32;
-    
-    
-         unsigned int value =  *((unsigned int *)dt->tap_link);
-       
-       
-       
-    if (dt->tap_type == DT_INT8)
-    {
-        buffer[i++] = value & 0xff;
-    }
-    
-    if (dt->tap_type == DT_INT16)
-    {
-        buffer[i++] = value >> 8;
-        buffer[i++] = value & 0xff;
-    }
-    
-    if (dt->tap_type == DT_INT32)
-    {
-        buffer[i++] = value >> 24;    
-        buffer[i++] = value >> 16;    
-        buffer[i++] = value >> 8;
-        buffer[i++] = value & 0xff;
-    }
-        
-    buffer[TX_DATA_OFS-1] = get_checksum(buffer, length);
-
-    network_send(n, buffer, length);*/
-}
-/* End of network_ident */
 
 
 /* Send data to all nodes */
