@@ -37,13 +37,11 @@
 #include "mnode.h"
 #include "network.h"
 
-network_type * network;         // All Network Data
-
 
 /* Add node to list */
-int network_add_node(unsigned int tx_node_id)
+int network_add_node( network_type *n, unsigned int tx_node_id )
 {
-    node_entry *tmp = network->node_list;
+    node_entry *tmp = n->node_list;
 
     // See if node is already in list 
 
@@ -57,9 +55,10 @@ int network_add_node(unsigned int tx_node_id)
 
     // Insert node
     tmp = (node_entry*) malloc(sizeof(node_entry));
-    tmp->next = network->node_list;
+
+    tmp->next = n->node_list;
     tmp->node_id = tx_node_id;
-    network->node_list = tmp;
+    n->node_list = tmp;
     
     return MN_SUCCESS;
 }
@@ -67,33 +66,33 @@ int network_add_node(unsigned int tx_node_id)
 
 
 /* Display node list */
-void network_list_nodes( void )
+void network_list_nodes( network_type *n )
 {
-    node_entry *tmp = network->node_list;
+    node_entry *tmp = n->node_list;
     
-    network->text_out("Node | Status\n");
+    n->text_out("Node | Status\n");
     
     while(tmp)
     {
-        network->text_out(" [%d]    ---- \n", tmp->node_id);
+        n->text_out(" [%d]    ---- \n", tmp->node_id);
         tmp = tmp->next;
     }
     
-    network->text_out("\n");
+    n->text_out("\n");
 }
 /* End of network_list_nodes */
 
 
 /* Free nodes list */
-void network_free_nodes( void )
+void network_free_nodes ( network_type *n )
 {
-    node_entry *tmp = network->node_list;
+    node_entry *tmp = n->node_list;
     
-    while(network->node_list)
+    while(n->node_list)
     {
-        tmp = network->node_list->next;
-        free (network->node_list);
-        network->node_list = tmp;
+        tmp = n->node_list->next;
+        free (n->node_list);
+        n->node_list = tmp;
         
     }
 }
@@ -101,7 +100,7 @@ void network_free_nodes( void )
 
 
 /* Compute checksum of packet */
-unsigned int get_checksum(unsigned char *buff, unsigned int len)
+unsigned int get_checksum ( unsigned char *buff, unsigned int len )
 {
 	unsigned char ck = 0;
 	
@@ -116,7 +115,7 @@ unsigned int get_checksum(unsigned char *buff, unsigned int len)
 
 
 /* Send IDENT packet */
-void network_ident (void )
+void network_ident ( network_type *n )
 {
     unsigned char buffer[100];
 
@@ -127,8 +126,8 @@ void network_ident (void )
     buffer[i++] = length >> 8;
     buffer[i++] = length &  0xff;
 
-    buffer[i++] = network->node_id >> 8;
-    buffer[i++] = network->node_id &  0xff;
+    buffer[i++] = n->node_id >> 8;
+    buffer[i++] = n->node_id &  0xff;
 
     buffer[i++] = 0;//node_id >> 8;
     buffer[i++] = 0;//node_id &  0xff;
@@ -139,14 +138,14 @@ void network_ident (void )
     
     buffer[TX_DATA_OFS-1] = get_checksum(buffer, length);
    
-    network_send(buffer, length);
+    network_send(n, buffer, length);
 
 }
 /* End of network_ident */
 
 
 /* Send IDENT packet */
-void network_identrq (void )
+void network_identrq ( network_type *n )
 {
     unsigned char buffer[100];
 
@@ -157,8 +156,8 @@ void network_identrq (void )
     buffer[i++] = length >> 8;
     buffer[i++] = length &  0xff;
 
-    buffer[i++] = network->node_id >> 8;
-    buffer[i++] = network->node_id &  0xff;
+    buffer[i++] = n->node_id >> 8;
+    buffer[i++] = n->node_id &  0xff;
 
     buffer[i++] = 0;//node_id >> 8;
     buffer[i++] = 0;//node_id &  0xff;
@@ -169,14 +168,14 @@ void network_identrq (void )
     
     buffer[TX_DATA_OFS-1] = get_checksum(buffer, length);
    
-    network_send(buffer, length);
+    network_send(n, buffer, length);
 
 }
 /* End of network_ident */
 
 
 /* Send string packet */
-void network_string (unsigned char *s )
+void network_string ( network_type *n, unsigned char *s )
 {
     unsigned char buffer[256];
     unsigned int length;
@@ -191,8 +190,8 @@ void network_string (unsigned char *s )
     buffer[i++] = length >> 8;
     buffer[i++] = length &  0xff;
 
-    buffer[i++] = network->node_id >> 8;
-    buffer[i++] = network->node_id &  0xff;
+    buffer[i++] = n->node_id >> 8;
+    buffer[i++] = n->node_id &  0xff;
     
     buffer[i++] = target_node_id >> 8;
     buffer[i++] = target_node_id &  0xff;
@@ -207,13 +206,13 @@ void network_string (unsigned char *s )
     // COmpute checksum  
     buffer[TX_DATA_OFS-1] = get_checksum(buffer, length); 
                  
-    network_send(buffer, length);
+    network_send(n, buffer, length);
 }
 /* End of network_string */
 
 
 /* Send IDENT packet */
-void network_datatap_poll (void )
+void network_datatap_poll ( network_type *n )
 {
     unsigned char buffer[100];
 
@@ -224,8 +223,8 @@ void network_datatap_poll (void )
     buffer[i++] = length >> 8;
     buffer[i++] = length &  0xff;
 
-    buffer[i++] = network->node_id >> 8;
-    buffer[i++] = network->node_id &  0xff;
+    buffer[i++] = n->node_id >> 8;
+    buffer[i++] = n->node_id &  0xff;
 
     buffer[i++] = 0;//node_id >> 8;
     buffer[i++] = 0;//node_id &  0xff;
@@ -236,16 +235,64 @@ void network_datatap_poll (void )
     
     buffer[TX_DATA_OFS-1] = get_checksum(buffer, length);
    
-    network_send(buffer, length);
+    network_send(n, buffer, length);
 
 }
 /* End of network_ident */
 
 
+
+
+
 /* Send IDENT packet */
-void network_datatap_data (datatap_type *dt)
+void network_broadcast ( network_type *n, 
+                         unsigned char packet_type, 
+                         unsigned char *data,
+                         unsigned int data_length )
 {
-    unsigned char buffer[100];
+  unsigned char buffer[100];
+
+    unsigned int length = TX_DATA_OFS + data_length;
+
+    unsigned int i = 0;
+    
+   
+    buffer[i++] = length >> 8;
+    buffer[i++] = length &  0xff;
+
+    buffer[i++] = n->node_id >> 8;
+    buffer[i++] = n->node_id &  0xff;
+
+    buffer[i++] = 0;//node_id >> 8;
+    buffer[i++] = 0;//node_id &  0xff;
+
+
+    buffer[i++] = packet_type;
+    
+   buffer[i++] = 0;  // No checksum for now
+    
+
+    int j = 0;
+
+    // Copy payload
+    for (j= 0; j < data_length; j++)
+        buffer[i++] = data[j];
+        
+    buffer[TX_DATA_OFS-1] = get_checksum(buffer, length);
+
+    network_send(n, buffer, length);
+
+}
+
+
+
+
+
+
+/* Send IDENT packet */
+void network_datatap_data ( network_type *n, datatap_type *dt )
+{
+    /*unsigned char buffer[100];
 
     unsigned int length = TX_DATA_OFS + 1  +32;
 
@@ -260,8 +307,8 @@ void network_datatap_data (datatap_type *dt)
     buffer[i++] = length >> 8;
     buffer[i++] = length &  0xff;
 
-    buffer[i++] = network->node_id >> 8;
-    buffer[i++] = network->node_id &  0xff;
+    buffer[i++] = n->node_id >> 8;
+    buffer[i++] = n->node_id &  0xff;
 
     buffer[i++] = 0;//node_id >> 8;
     buffer[i++] = 0;//node_id &  0xff;
@@ -305,13 +352,13 @@ void network_datatap_data (datatap_type *dt)
         
     buffer[TX_DATA_OFS-1] = get_checksum(buffer, length);
 
-    network_send(buffer, length);
+    network_send(n, buffer, length);*/
 }
 /* End of network_ident */
 
 
 /* Send data to all nodes */
-int network_send(unsigned char *data, unsigned int length)
+int network_send ( network_type *n, unsigned char *data, unsigned int length )
 {
     struct sockaddr_in si_remote_temp;
     
@@ -323,7 +370,7 @@ int network_send(unsigned char *data, unsigned int length)
 
     if ((s=socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP))==-1)
     {
-        network->text_out(MODULE_NAME "socket error\n");
+        n->text_out(MODULE_NAME "socket error\n");
         return MN_FAIL;
     }
    
@@ -333,20 +380,20 @@ int network_send(unsigned char *data, unsigned int length)
         
            
     status = setsockopt(s, SOL_SOCKET, SO_BROADCAST, &yes, sizeof(int) );
-    //  network->text_out("Setsockopt Status = %d\n", status);        
+    //  n->text_out("Setsockopt Status = %d\n", status);        
         
         
     if (   inet_pton(AF_INET, BCAST_IP, (struct sockaddr *)&si_remote_temp.sin_addr) == 0 )
     {
-        network->text_out(MODULE_NAME "inet_aton() failed\n");
+        n->text_out(MODULE_NAME "inet_aton() failed\n");
         return MN_FAIL;
     }
           
-    //snetwork->text_out(buf, "%s", data);
+    //sn->text_out(buf, "%s", data);
     
     if (sendto(s, data, length, 0, (struct sockaddr *)&si_remote_temp, slen)==-1)
     {
-        network->text_out(MODULE_NAME "Sendto fail\n");
+        n->text_out(MODULE_NAME "Sendto fail\n");
         return MN_FAIL;
        
     }
@@ -359,17 +406,31 @@ int network_send(unsigned char *data, unsigned int length)
 
 
 /* Core network thread */
-void *network_thread( void *threadid )
+void *network_thread (  void *threadid )
 {
     unsigned char  buf[BUFLEN];
 
-    socklen_t      slen=sizeof(network->si_remote);
+    socklen_t      slen;
 
     unsigned int time_count = 0;
+       
     
-    network->text_out(MODULE_NAME "Network Thread - Started\n");
+    network_type *n = (network_type *) threadid;
     
-    while(network->running)
+    
+    if (n == NULL)
+    {
+        pthread_exit(NULL); // exit thread
+        return NULL;
+    }
+    
+    
+    n->text_out(MODULE_NAME "Thread Started\n");
+            
+    slen=sizeof(n->si_remote);
+        
+    
+    while(n->running)
     {
         struct timeval tval;
 
@@ -379,22 +440,28 @@ void *network_thread( void *threadid )
         tval.tv_usec = 0;
     
         FD_ZERO(&readfds);
-        FD_SET(network->server_sd, &readfds);
+        FD_SET(n->server_sd, &readfds);
 
 
-        select(network->server_sd+1, &readfds, NULL, NULL, &tval);
+        select(n->server_sd+1, &readfds, NULL, NULL, &tval);
 
-        if (FD_ISSET(network->server_sd, &readfds))
+        if (FD_ISSET(n->server_sd, &readfds))
         {
-            int ret = recvfrom(network->server_sd, (char *)buf, BUFLEN, 0, (struct sockaddr *)&network->si_remote, &slen);
+            int ret = recvfrom(n->server_sd, (char *)buf, BUFLEN, 0, (struct sockaddr *)&n->si_remote, &slen);
            
             if (ret ==-1)
             {
-               network->text_out(MODULE_NAME "recvfrom fail");
+               n->text_out(MODULE_NAME "recvfrom fail");
                 continue;
             }
        
-            network->mesh_parser(buf, ret);
+       
+//       int i;
+//       for (i = 0; i < ret; i++)
+//       n->text_out("%x ", buf[i]);
+      
+       
+            n->mesh_parser(buf, ret);
 
         }
         else
@@ -404,23 +471,25 @@ void *network_thread( void *threadid )
             if (time_count == 10)
             {
                 time_count = 0;
-                network_ident();            // Set out  keep alive
+                network_ident(n);            // Set out  keep alive
             }
          
-            network->mesh_update();
+            n->mesh_update();
                               
             // Timeout ?
         }   
         
-        /*                        
-        network->text_out("Data from: %s:%d\n", inet_ntoa(si_remote.sin_addr),
-                                    ntohs(si_remote.sin_port));
-                                   
-          network->text_out(" %s\n", buf);*/
+        //                       
+        //n->text_out("Data from: %s:%d\n", inet_ntoa(si_remote.sin_addr),
+        //                            ntohs(si_remote.sin_port));
+         //                          
+         // n->text_out(" %s\n", buf);
+          
+      //    sleep(1);
     }
     
    
-    network->text_out(MODULE_NAME "Shutdown\n");
+    n->text_out(MODULE_NAME "Shutdown\n");
 
     pthread_exit(NULL); // exit thread
 }
@@ -428,35 +497,35 @@ void *network_thread( void *threadid )
 
 
 /* Init the network */
-int network_init( void )
+int network_init( network_type *n )
 {
 
     // load node id
     
-    network->node_id = 0;
+    n->node_id = 0;
     FILE *f = fopen("node_id", "rt");
     if (!f)
     {
-        network->text_out(MODULE_NAME "Unable to load node_id\n");
+        n->text_out(MODULE_NAME "Unable to load node_id\n");
         return MN_FAIL;
     }
 
-    fscanf(f, "%d", &network->node_id);
+    fscanf(f, "%d", &n->node_id);
     
-    if (network->node_id == 0)
+    if (n->node_id == 0)
     {
-        network->text_out(MODULE_NAME "node_id 0 not allowed\n");
+        n->text_out(MODULE_NAME "node_id 0 not allowed\n");
         return MN_FAIL;
     }
 
-    network->text_out(MODULE_NAME "Node id: %d\n", network->node_id);
+    n->text_out(MODULE_NAME "Node id: %d\n", n->node_id);
 
 
 //    int i;
     
-    if ((network->server_sd=socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP))==-1)
+    if ((n->server_sd=socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP))==-1)
     {
-        network->text_out(MODULE_NAME "socket error\n");
+        n->text_out(MODULE_NAME "socket error\n");
         return MN_FAIL;
     }
     
@@ -468,27 +537,27 @@ fcntl(sock, F_SETFL, flags);*/
         
     
     
-    memset((char *) &network->si_local, 0, sizeof(network->si_local));
+    memset((char *) &n->si_local, 0, sizeof(n->si_local));
     
-    network->si_local.sin_family = AF_INET;
-    network->si_local.sin_port = htons(LISTEN_PORT);
-    network->si_local.sin_addr.s_addr = htonl(INADDR_ANY);
+    n->si_local.sin_family = AF_INET;
+    n->si_local.sin_port = htons(LISTEN_PORT);
+    n->si_local.sin_addr.s_addr = htonl(INADDR_ANY);
 
      int on = 1;
-     if (setsockopt(network->server_sd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on)) != 0)
+     if (setsockopt(n->server_sd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on)) != 0)
      {
      
-        network->text_out(MODULE_NAME "setsockopt fail");
+        n->text_out(MODULE_NAME "setsockopt fail");
         return MN_FAIL;
      }
  
-    if (bind(network->server_sd, (struct sockaddr *)&network->si_local, sizeof(network->si_local))==-1)
+    if (bind(n->server_sd, (struct sockaddr *)&n->si_local, sizeof(n->si_local))==-1)
     {
-        network->text_out(MODULE_NAME "bind error %d\n", errno);
+        n->text_out(MODULE_NAME "bind error %d\n", errno);
         return MN_FAIL;
     }
     
-    network->running = 1;
+    n->running = 1;
     
     return MN_SUCCESS;
 }
@@ -496,39 +565,47 @@ fcntl(sock, F_SETFL, flags);*/
 
 
 /* Start network layer */
-int network_start( void (*mesh_parser_link)(unsigned char *, unsigned int), 
-                        void (*mesh_update)(void) ,
-                            void (*out_func)(char * format, ...) )
+int network_start ( network_type *n,  void (*mesh_parser_link)(unsigned char *, unsigned int), 
+                    void (*mesh_update)(void) ,
+                    void (*out_func)(char * format, ...) )
 {
-    network = (network_type *) malloc (sizeof(network_type));
+//    network = (network_type *) malloc (sizeof(network_type));
+
+     n->text_out= out_func;
+
+    if (0 == n->text_out)
+        return MN_FAIL;
+  
+    
+     n->text_out(MODULE_NAME "Start\n");   
     
     // Init values
-    network->node_id = 0;
-    network->mesh_parser = NULL;
-    network->running = 0;
+    n->node_id = 0;
+    n->mesh_parser = NULL;
+    n->running = 0;
 
 
-    network->node_list = NULL;
+    n->node_list = NULL;
 
 
     // Link Parser
-    network->mesh_parser = mesh_parser_link;
+    n->mesh_parser = mesh_parser_link;
 
     // Link Parser
-    network->mesh_update = mesh_update;
+    n->mesh_update = mesh_update;
 
-    network->text_out= out_func;
 
-    if (network_init())
+
+    if (network_init(n))
     {
-        network->text_out(MODULE_NAME "Network setup failed, operating in write-only mode\n");
+        n->text_out(MODULE_NAME "Network setup failed, operating in write-only mode\n");
         return MN_FAIL;
     }
 
-    pthread_create(&network->network_t, NULL, network_thread, NULL);
+    pthread_create(&n->network_t, NULL, network_thread, (void *)(n));
     
-    network_ident (); // send own init
-    network_identrq (); // request ident from other nodes
+    network_ident (n); // send own init
+    network_identrq (n); // request ident from other nodes
     
     
     return MN_SUCCESS;
@@ -538,15 +615,18 @@ int network_start( void (*mesh_parser_link)(unsigned char *, unsigned int),
 
 
 /* Stop network layer */
-void network_stop( void )
+void network_stop ( network_type *n )
 {
-    network->running = 0;
+    n->text_out(MODULE_NAME "Stop\n");
+    n->running = 0;
  
     sleep(2);
   
-    close(network->server_sd);
+    close(n->server_sd);
     
-    network_free_nodes();
+    network_free_nodes(n);
+    
+    n->text_out(MODULE_NAME "Stop - end\n");    
 }
 /* End of network stop*/
 

@@ -30,6 +30,9 @@
 #include <pthread.h>
 #include <arpa/inet.h>
 
+
+
+
 #define BUFLEN 4096 
 #define LISTEN_PORT 9998
 #define BCAST_IP "255.255.255.255"
@@ -77,24 +80,31 @@ typedef struct
 } network_type;
 
 
-int network_init( void );
+int network_init( network_type *n );
 
-int network_start( void (*mesh_parser_link)(unsigned char *, unsigned int), 
+int network_start( network_type *n, void (*mesh_parser_link)(unsigned char *, unsigned int), 
                    void (*mesh_update)(void),
                    void (*out_func)(char * format, ...));
                    
-void network_stop( void );
-int network_send(unsigned char *data, unsigned int length);
+void network_stop( network_type *n);
+int network_send( network_type *n, unsigned char *data, unsigned int length);
 
-void network_ident (void );
-void network_string (unsigned char *s );
+void network_ident ( network_type *n);
+void network_string ( network_type *n, unsigned char *s );
 
-int network_add_node(unsigned int tx_node_id);
-void network_list_nodes( void );
-void network_free_nodes( void );
+int network_add_node( network_type *n, unsigned int tx_node_id);
+void network_list_nodes( network_type *n );
+void network_free_nodes( network_type *n );
 
-void network_datatap_poll (void );
-void network_datatap_data (datatap_type *d);
+void network_datatap_poll ( network_type *n);
+//void network_datatap_data ( network_type *n, datatap_type *d);
+
+
+void network_broadcast ( network_type *n, 
+                         unsigned char packet_type, 
+                         unsigned char *data,
+                         unsigned int data_length);
+
 
 #endif
 

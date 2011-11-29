@@ -31,7 +31,7 @@
 
 
 #include "datatap.h"
-#include "network.h"
+//#include "network.h"
 
 datatap_type *data_taps = NULL;
 
@@ -63,18 +63,72 @@ void data_tap_add(char *name, unsigned int tap_type, void * tap_link)
 //    network_datatap_data (&t1);
    
 }
+//extern network_type *network;
+
+void data_tap_send(network_type *n, datatap_type *dt )
+{
+    unsigned char buffer[100];
+  
+    unsigned int i = 0;
+  
+    buffer[i++] = dt->tap_type;  // No checksum for now
+      
+    // Copy over tap name
+    memset(buffer+i, 0, 32);
+   strcpy((char *)(buffer+i), dt->tap_name);
+
+    i+=32;
+    
+    
+    unsigned int value =  *((unsigned int *)dt->tap_link);
+       
+       
+    if (dt->tap_type == DT_INT8)
+    {
+        buffer[i++] = value & 0xff;
+    }
+    
+    if (dt->tap_type == DT_INT16)
+    {
+        buffer[i++] = value >> 8;
+        buffer[i++] = value & 0xff;
+    }
+    
+    if (dt->tap_type == DT_INT32)
+    {
+        buffer[i++] = value >> 24;    
+        buffer[i++] = value >> 16;    
+        buffer[i++] = value >> 8;
+        buffer[i++] = value & 0xff;
+    }
+    
+    network_broadcast ( n, ID_DTDATA, buffer, i);
+
+}
+
+
+
+
+
+
+
+
+
+
 
 
 
 /* Respond to poll request */
-void datatap_poll( void )
+void datatap_poll( network_type *n )
 {
     datatap_type *tmp = data_taps;
 
     // Iterate through taps and send to network
     while(tmp)
     {
-        network_datatap_data (tmp);
+        data_tap_send(n, tmp);
+
+//        network_datatap_data (n,tmp);
         tmp = tmp->next;
     }   
 }

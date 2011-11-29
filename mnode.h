@@ -29,20 +29,45 @@
 #ifndef MNODE_H
 #define MNODE_H
 
+#include "network.h"
+
 #define MN_SUCCESS      0
 #define MN_FAIL         1
-
-
 
 #define STATE_WAIT      0
 #define STATE_LENGTH    1
 #define STATE_DATA      2
 
 
+typedef struct 
+{
+    // system datataps  
+    unsigned int local_freeram;
+    unsigned int local_procs;
+
+    void (*text_out)(char * format, ...);
+    
+   network_type * network;         // All Network Data
+
+} mnode_type;
+
+
 int mnode_start(void (*out_func)(char * format, ...));
 int mnode_stop(void);
 
 int mnode_tap_add(char *name, unsigned int tap_type, void * tap_link);
+
+
+
+
+void mnode_ident ( void );
+void mnode_string ( unsigned char *s );
+void mnode_list_nodes( void );
+void mnode_datatap_poll( void );
+
+
+
+
 
 #endif
 

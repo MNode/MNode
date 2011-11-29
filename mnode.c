@@ -27,6 +27,7 @@
 #define MODULE_NAME "[MNode] "
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 #include <sys/sysinfo.h>
@@ -35,11 +36,22 @@
 #include "datatap.h"
 #include "network.h"
 
-// system datataps  
-unsigned int local_freeram;
-unsigned int local_procs;
 
-void (*text_out)(char * format, ...) = NULL;
+
+
+
+mnode_type *mnode;
+
+
+
+
+// system datataps  
+//unsigned int local_freeram;
+//unsigned int local_procs;
+//void (*text_out)(char * format, ...) = NULL;
+
+
+
 
 /* Return a word from inside a buffer */
 unsigned int get_word(unsigned char * b)
@@ -52,6 +64,11 @@ unsigned int get_word(unsigned char * b)
 /* All network traffic is router through here */
 void mnode_packet(unsigned char *data, unsigned int length)
 {
+
+
+
+
+
     unsigned int i;
     unsigned int tx_length   = get_word(data);//data[0]*256+data[1];
     unsigned int tx_src_node_id     = get_word(data+2);//data[2]*256+data[3];
@@ -68,28 +85,41 @@ void mnode_packet(unsigned char *data, unsigned int length)
     printw(" Checksum: %d\n", tx_checksum);*/
     
     
+    
+    
     if (tx_type == ID_IDENT)
     {
-        if (network_add_node(tx_src_node_id) == 0)       // Add to node list
-            text_out(MODULE_NAME "Node %d->%d IDENT\n", tx_src_node_id, tx_tar_node_id ); // display if new
+        mnode->text_out(MODULE_NAME "ID_IDENT\n");
+    
+        if (network_add_node(mnode->network, tx_src_node_id) == 0)       // Add to node list
+          ;//  mnode->text_out(MODULE_NAME "Node %d->%d IDENT\n", tx_src_node_id, tx_tar_node_id ); // display if new
             
+        
+        
+
     } else
     
     if (tx_type == ID_IDENTRQ)
     {
-       // printw("[Node %d->%d] IDENTQR\n", tx_src_node_id, tx_tar_node_id );
-        network_ident();
+        mnode->text_out(MODULE_NAME "ID_IDENTRQ\n");
+        
+        network_ident(mnode->network);
     } else
 
 
     if (tx_type == ID_DTPOLL)
     {
+        mnode->text_out(MODULE_NAME "ID_DTPOLL\n");
+    
+    
         //printw("[Node %d->%d] DTPOLL\n", tx_src_node_id, tx_tar_node_id );
-        datatap_poll();
+        datatap_poll(mnode->network);
     } else
 
     if (tx_type == ID_DTDATA)
     {
+        mnode->text_out(MODULE_NAME "ID_DTDATA\n");
+    
        // printw("[Node %d->%d] DTDATA\n", tx_src_node_id, tx_tar_node_id );
      
        datatap_data(tx_src_node_id, data + TX_DATA_OFS, length-TX_DATA_OFS);
@@ -98,20 +128,22 @@ void mnode_packet(unsigned char *data, unsigned int length)
 
     if (tx_type == ID_STRING)
     {
-       unsigned int string_len = tx_length - TX_DATA_OFS;
+        mnode->text_out(MODULE_NAME "ID_STRING\n");
+        
+        unsigned int string_len = tx_length - TX_DATA_OFS;
     
-        text_out(MODULE_NAME "Node %d->%d STRING: ", tx_src_node_id, tx_tar_node_id );
+        mnode->text_out(MODULE_NAME "Node %d->%d STRING: ", tx_src_node_id, tx_tar_node_id );
         
         for (i = 0; i < string_len; i++)
-            text_out("%c", data[i+TX_DATA_OFS]);
+            mnode->text_out("%c", data[i+TX_DATA_OFS]);
         
-       text_out("\n");
+       mnode->text_out("\n");
         
     
     } else
     {
     
-        text_out(MODULE_NAME "Unknown packet type from %d->%d\n", tx_src_node_id, tx_tar_node_id );
+        mnode->text_out(MODULE_NAME "Unknown packet type from %d->%d\n", tx_src_node_id, tx_tar_node_id );
     
     }
     
@@ -128,8 +160,8 @@ void mnode_update( void )
     sysinfo(&si);
  
 
-    local_freeram = si.freeram;
-    local_procs = si.procs;
+    mnode->local_freeram = si.freeram;
+    mnode->local_procs = si.procs;
 
 }
 /* End of mnode_update */
@@ -140,13 +172,23 @@ void mnode_update( void )
 int mnode_start(void (*out_func)(char * format, ...))
 //int mnode_start(void)
 {
-    text_out = out_func;
+    mnode = (mnode_type *)malloc(sizeof(mnode_type));
+
+    mnode->text_out = NULL;
+
+    mnode->text_out = out_func;
           
-    network_start(mnode_packet, mnode_update, text_out);
+          
+          
+    mnode->network = (network_type *) malloc (sizeof(network_type));
+          
+          
+          
+    network_start(mnode->network, mnode_packet, mnode_update, mnode->text_out);
 
      // Add system taps
-    data_tap_add("freeram", DT_INT32, &local_freeram);
-    data_tap_add("procs", DT_INT32, &local_procs);
+    data_tap_add("freeram", DT_INT32, &mnode->local_freeram);
+    data_tap_add("procs", DT_INT32, &mnode->local_procs);
  
     return MN_SUCCESS;
 }
@@ -156,6 +198,17 @@ int mnode_start(void (*out_func)(char * format, ...))
 /* Stop node */
 int mnode_stop(void)
 {
+    mnode->text_out(MODULE_NAME "Stop\n");
+
+    network_stop( mnode->network );
+
+    free(mnode->network);
+
+
+    mnode->text_out(MODULE_NAME "Stop - end\n");
+
+//    free (mnode);
+
     return MN_SUCCESS;
 }
 /* End of mnode_stop */
@@ -171,5 +224,60 @@ int mnode_tap_add(char *name, unsigned int tap_type, void * tap_link)
     return MN_SUCCESS;
 }
 /* End of mnode_start */
+
+
+
+
+
+
+
+
+
+
+
+void mnode_ident (  void )
+{
+network_ident(mnode->network);
+
+}
+
+void mnode_string (  unsigned char *s )
+{
+
+network_string(mnode->network, s);
+}
+
+
+
+
+void mnode_list_nodes( void)
+{
+
+network_list_nodes(mnode->network);
+
+}
+
+
+void mnode_datatap_poll( void )
+{
+network_datatap_poll(mnode->network);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 

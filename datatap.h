@@ -29,6 +29,7 @@
 #ifndef DATATAP_H
 #define DATATAP_H
 
+#include "network.h"
 
 
 #define DT_INT8     1
@@ -55,7 +56,11 @@ typedef struct datatap_type
 
 
 /* Respond to poll request */
-void datatap_poll( void );
+//void datatap_poll( void );
+
+
+void datatap_poll( network_type *n );
+
 
 /* Got data from other node */
 void datatap_data( unsigned int node_id, 

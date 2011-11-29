@@ -114,7 +114,10 @@ void command_exit( void )
 /* Menu command - send */
 void command_ident( void )
 {
-    network_ident();
+
+mnode_ident();
+
+//    network_ident();
 }
 /* End of command_send */
 
@@ -122,7 +125,10 @@ void command_ident( void )
 /* Menu command - help */
 void command_string( char *s )
 {
-    network_string((unsigned char *)s);
+
+mnode_string((unsigned char *)s);
+
+//    network_string((unsigned char *)s);
 
 }
 /* End of command_help */
@@ -131,7 +137,9 @@ void command_string( char *s )
 /* Menu command - help */
 void command_nodes( void )
 {
-    network_list_nodes();
+//    network_list_nodes();
+mnode_list_nodes();
+
 
 }
 /* End of command_help */
@@ -149,7 +157,10 @@ void command_data( void )
 void command_nodedata( void )
 {
     log_out("Sending Request\n");
-    network_datatap_poll();
+    
+    mnode_datatap_poll();
+    
+    
 }
 /* End of command_nodedata */
 
@@ -192,7 +203,7 @@ void monitor_start( void )
       
     log_win_setup();
 
-    log_out(MODULE_NAME "Startup\n");
+    log_out(MODULE_NAME "Start\n");
 
     main_running = 1;
 
@@ -208,11 +219,13 @@ void monitor_start( void )
 /* Monitor stop */
 void monitor_stop( void )
 {
+    log_out(MODULE_NAME "Stop\n");
+
     mnode_stop();
 
     fclose(log_file);
 
-    endwin(); /* End curses mode */
+    endwin();
 }
 /* End of monitor_stop */
 
