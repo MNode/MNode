@@ -91,7 +91,7 @@ static void log_out( char *fmt, ... )
     wrefresh(log_win_area);
 
     // Move curser back home
-    mvprintw(screen_y-1,0,"> ");
+    //mvprintw(screen_y-1,0,"> ");
 
     refresh();
 
