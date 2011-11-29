@@ -24,13 +24,11 @@
     File: network.h
 */
 
-
 #ifndef NETWORK_H
 #define NETWORK_H
 
 #include <pthread.h>
 #include <arpa/inet.h>
-
 
 #define BUFLEN 4096 
 #define LISTEN_PORT 9998
@@ -72,7 +70,6 @@ typedef struct
     
     void (*text_out)(char * format, ...);
 
-
     int running;
     
     node_entry *node_list; // Node list
@@ -81,12 +78,11 @@ typedef struct
 
 
 int network_init( void );
+
 int network_start( void (*mesh_parser_link)(unsigned char *, unsigned int), 
-                        void (*mesh_update)(void) ,
-                            void (*out_func)(char * format, ...);
-                        
-                        
-                        );
+                   void (*mesh_update)(void),
+                   void (*out_func)(char * format, ...));
+                   
 void network_stop( void );
 int network_send(unsigned char *data, unsigned int length);
 
@@ -97,21 +93,9 @@ int network_add_node(unsigned int tx_node_id);
 void network_list_nodes( void );
 void network_free_nodes( void );
 
-
 void network_datatap_poll (void );
 void network_datatap_data (datatap_type *d);
 
-
-
-
-
-
 #endif
-
-
-
-
-
-
 
 

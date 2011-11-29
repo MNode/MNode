@@ -24,35 +24,28 @@
     File: MNode.c
 */
 
+#define MODULE_NAME "[Monitor] "
 
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
 #include <ncurses.h>
 
-
 #include "mnode.h"
 #include "datatap.h"
 #include "network.h"
 
-#define MODULE_NAME "[Monitor] "
-
-
-
-#define ENABLE_CURSES 0
 
 int main_running;
 int screen_x;
 int screen_y;
 int count = 0;          // Global var for datatap linking
 
-
-
 FILE *log_file = NULL;
 WINDOW *log_win = NULL;
 WINDOW *log_win_area = NULL;
 
-
+/* Create log window */
 int log_win_setup( void )
 {
     int x_pos = 0;
@@ -78,11 +71,12 @@ int log_win_setup( void )
    
     return MN_SUCCESS;
 }
+/* End of log_win_setup */
+
 
 /* All output is routed through this function */
 static void log_out( char *fmt, ... )
 {
-
     const unsigned int max = 1024;
     char text[max];
 
@@ -93,17 +87,13 @@ static void log_out( char *fmt, ... )
     vsnprintf(text, max, fmt, args);
 
     wprintw(log_win_area, "%s", text);
-
-
-    
+   
     wrefresh(log_win_area);
-
 
     // Move curser back home
     mvprintw(screen_y-1,0,"> ");
 
     refresh();
-
 
     if (log_file != NULL)
         fprintf(log_file, "%s\n", text);
@@ -113,7 +103,6 @@ static void log_out( char *fmt, ... )
 /* End of output function */
 
 
-
 /* Menu command - exit */
 void command_exit( void )
 {
@@ -121,13 +110,13 @@ void command_exit( void )
 }
 /* End of command_exit */
 
+
 /* Menu command - send */
 void command_ident( void )
 {
     network_ident();
 }
 /* End of command_send */
-
 
 
 /* Menu command - help */
@@ -148,23 +137,24 @@ void command_nodes( void )
 /* End of command_help */
 
 
-
+/* Local data */
 void command_data( void )
 {
     log_out("Not implemented\n");
 }
+/* End of command_data */
 
 
+/* End of nodedata */
 void command_nodedata( void )
 {
     log_out("Sending Request\n");
     network_datatap_poll();
 }
-
-
-
+/* End of command_nodedata */
 
 /* Menu command - help */
+
 void command_help( void )
 {
     log_out("Commands\n");
@@ -180,10 +170,9 @@ void command_help( void )
 /* End of command_help */
 
 
-
+/* Monitor startup */
 void monitor_start( void )
 {
-
     log_file = fopen("log", "wt");
 
     initscr(); /* Start curses mode */
@@ -213,8 +202,10 @@ void monitor_start( void )
 
     mnode_tap_add("count", DT_INT32, &count);
 }
+/* End of monitor_start */
 
 
+/* Monitor stop */
 void monitor_stop( void )
 {
     mnode_stop();
@@ -223,25 +214,18 @@ void monitor_stop( void )
 
     endwin(); /* End curses mode */
 }
-
-
-
+/* End of monitor_stop */
 
 /* Main */
+
 int main ( void )
 {
     char s[1000];
-
-  
-  
+ 
     monitor_start();
-    
-
-    
+   
     while(main_running)
     {
-
-
         mvprintw(0,screen_x/2-8,"");
         
         printw("[MNode Monitor]");
@@ -249,12 +233,7 @@ int main ( void )
         mvprintw(screen_y-1,0,">                                             ");
         mvprintw(screen_y-1,0,"> ");
 
-        // mvprintw(1,0,"");
-
-         refresh();
-
-       // mvwprintw(log_win, 1,0,"");
-      //  wclear(log_win);
+        refresh();
 
         getstr(s);
 
@@ -288,12 +267,9 @@ int main ( void )
     }
     
     monitor_stop();
-
     
-    return 0;
+    return MN_SUCCESS;
  }
  /* End of main */
- 
- 
  
  

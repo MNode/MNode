@@ -24,28 +24,22 @@
     File: MNode.c
 */
 
+#define MODULE_NAME "[MNode] "
 
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
 #include <sys/sysinfo.h>
 
-
 #include "mnode.h"
 #include "datatap.h"
 #include "network.h"
 
-#define MODULE_NAME "[MNode] "
-
-
 // system datataps  
-
 unsigned int local_freeram;
 unsigned int local_procs;
 
-
 void (*text_out)(char * format, ...) = NULL;
-
 
 /* Return a word from inside a buffer */
 unsigned int get_word(unsigned char * b)
@@ -125,12 +119,6 @@ void mnode_packet(unsigned char *data, unsigned int length)
 /* End of mesh_data */
 
 
-
-
-
-
-
-
 /* Called by networking code every second */
 void mnode_update( void )
 {
@@ -157,15 +145,12 @@ int mnode_start(void (*out_func)(char * format, ...))
     network_start(mnode_packet, mnode_update, text_out);
 
      // Add system taps
-  
     data_tap_add("freeram", DT_INT32, &local_freeram);
     data_tap_add("procs", DT_INT32, &local_procs);
  
-  
     return MN_SUCCESS;
 }
 /* End of mnode_start */
-
 
 
 /* Stop node */
@@ -175,7 +160,6 @@ int mnode_stop(void)
 }
 /* End of mnode_stop */
 
- 
 
 /* Start node */
 int mnode_tap_add(char *name, unsigned int tap_type, void * tap_link)
@@ -189,15 +173,3 @@ int mnode_tap_add(char *name, unsigned int tap_type, void * tap_link)
 /* End of mnode_start */
 
 
-
-
-
-
-
-
-
-
-
-
-
- 

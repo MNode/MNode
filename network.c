@@ -27,8 +27,6 @@
 #define MODULE_NAME "[Network] "
 
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h> 
 #include <unistd.h> 
 #include <stdlib.h>
 #include <memory.h>
@@ -64,7 +62,6 @@ int network_add_node(unsigned int tx_node_id)
     network->node_list = tmp;
     
     return MN_SUCCESS;
-    
 }
 /* End of network_add_node */
 
@@ -118,8 +115,6 @@ unsigned int get_checksum(unsigned char *buff, unsigned int len)
 /* End of get_checksum */
 
 
-
-
 /* Send IDENT packet */
 void network_ident (void )
 {
@@ -149,6 +144,7 @@ void network_ident (void )
 }
 /* End of network_ident */
 
+
 /* Send IDENT packet */
 void network_identrq (void )
 {
@@ -177,8 +173,6 @@ void network_identrq (void )
 
 }
 /* End of network_ident */
-
-
 
 
 /* Send string packet */
@@ -218,10 +212,6 @@ void network_string (unsigned char *s )
 /* End of network_string */
 
 
-
-
-
-
 /* Send IDENT packet */
 void network_datatap_poll (void )
 {
@@ -250,7 +240,6 @@ void network_datatap_poll (void )
 
 }
 /* End of network_ident */
-
 
 
 /* Send IDENT packet */
@@ -321,11 +310,6 @@ void network_datatap_data (datatap_type *dt)
 /* End of network_ident */
 
 
-
-
-
-
-
 /* Send data to all nodes */
 int network_send(unsigned char *data, unsigned int length)
 {
@@ -372,7 +356,6 @@ int network_send(unsigned char *data, unsigned int length)
     return MN_SUCCESS;
 }
 /* End of network_send */
-
 
 
 /* Core network thread */
