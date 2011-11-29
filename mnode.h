@@ -53,25 +53,25 @@ struct mnode_type
 
     void (*text_out)(char * format, ...);
     
+    void (*mesh_packet)(mnode_type *, unsigned char *, unsigned int);
+    void (*mesh_update)(mnode_type *);
+    
+    
    network_type * network;         // All Network Data
+
 
 };
 
 
-int mnode_start(void (*out_func)(char * format, ...));
-int mnode_stop(void);
+int mnode_start(mnode_type *m, void (*out_func)(char * format, ...));
+int mnode_stop(mnode_type *m);
 
-int mnode_tap_add(char *name, unsigned int tap_type, void * tap_link);
+int mnode_tap_add(mnode_type *m, char *name, unsigned int tap_type, void * tap_link);
 
-
-
-
-void mnode_ident ( void );
-void mnode_string ( unsigned char *s );
-void mnode_list_nodes( void );
-void mnode_datatap_poll( void );
-
-
+void mnode_ident ( mnode_type *m );
+void mnode_string (mnode_type *m,  unsigned char *s );
+void mnode_list_nodes( mnode_type *m );
+void mnode_datatap_poll(mnode_type *m );
 
 
 

@@ -353,7 +353,7 @@ void *network_thread (  void *threadid )
 //       n->text_out("%x ", buf[i]);
       
        
-            n->mesh_parser(buf, ret);
+            n->mesh_packet(n->mnode, buf, ret);
 
         }
         else
@@ -366,7 +366,7 @@ void *network_thread (  void *threadid )
                 network_ident(n);            // Set out  keep alive
             }
          
-            n->mesh_update();
+            n->mesh_update(n->mnode);
                               
             // Timeout ?
         }   
@@ -455,37 +455,28 @@ fcntl(sock, F_SETFL, flags);*/
 }
 /* End of network_init */
 
-
-/* Start network layer */
-int network_start ( network_type *n,  void (*mesh_parser_link)(unsigned char *, unsigned int), 
-                    void (*mesh_update)(void) ,
-                    void (*out_func)(char * format, ...) )
+int network_start( network_type *n, mnode_type *m )
 {
-//    network = (network_type *) malloc (sizeof(network_type));
+    // Init values
+    n->node_id = 0;
+    n->mesh_packet= NULL;
+    n->running = 0;
+    n->node_list = NULL;
 
-     n->text_out= out_func;
+    n->mnode = m;           // link to parent mnode
+
+    n->text_out = m->text_out;  //;
 
     if (0 == n->text_out)
         return MN_FAIL;
   
-    
-     n->text_out(MODULE_NAME "Start\n");   
-    
-    // Init values
-    n->node_id = 0;
-    n->mesh_parser = NULL;
-    n->running = 0;
-
-
-    n->node_list = NULL;
-
+    n->text_out(MODULE_NAME "Start\n");   
 
     // Link Parser
-    n->mesh_parser = mesh_parser_link;
+    n->mesh_packet = m->mesh_packet;;
 
     // Link Parser
-    n->mesh_update = mesh_update;
-
+    n->mesh_update = m->mesh_update;
 
 
     if (network_init(n))

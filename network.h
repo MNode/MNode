@@ -75,9 +75,9 @@ struct network_type
     int node_id;
 
     struct sockaddr_in si_local, si_remote;
-    void (*mesh_parser)(unsigned char *, unsigned int);
+    void (*mesh_packet)(mnode_type *, unsigned char *, unsigned int);
+    void (*mesh_update)(mnode_type *);
     
-    void (*mesh_update)(void);
     
     void (*text_out)(char * format, ...);
 
@@ -94,9 +94,7 @@ struct network_type
 
 int network_init( network_type *n );
 
-int network_start( network_type *n, void (*mesh_parser_link)(unsigned char *, unsigned int), 
-                   void (*mesh_update)(void),
-                   void (*out_func)(char * format, ...));
+int network_start( network_type *n, mnode_type *m);
                    
 void network_stop( network_type *n);
 int network_send( network_type *n, unsigned char *data, unsigned int length);

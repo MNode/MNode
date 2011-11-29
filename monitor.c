@@ -45,6 +45,11 @@ FILE *log_file = NULL;
 WINDOW *log_win = NULL;
 WINDOW *log_win_area = NULL;
 
+
+
+mnode_type *mnode;
+
+
 /* Create log window */
 int log_win_setup( void )
 {
@@ -115,7 +120,7 @@ void command_exit( void )
 void command_ident( void )
 {
 
-mnode_ident();
+    mnode_ident(mnode);
 
 //    network_ident();
 }
@@ -126,7 +131,7 @@ mnode_ident();
 void command_string( char *s )
 {
 
-mnode_string((unsigned char *)s);
+    mnode_string(mnode,(unsigned char *)s);
 
 //    network_string((unsigned char *)s);
 
@@ -138,7 +143,7 @@ mnode_string((unsigned char *)s);
 void command_nodes( void )
 {
 //    network_list_nodes();
-mnode_list_nodes();
+    mnode_list_nodes(mnode);
 
 
 }
@@ -158,7 +163,7 @@ void command_nodedata( void )
 {
     log_out("Sending Request\n");
     
-    mnode_datatap_poll();
+    mnode_datatap_poll(mnode);
     
     
 }
@@ -207,11 +212,15 @@ void monitor_start( void )
 
     main_running = 1;
 
-    mnode_start(log_out);
+
+    mnode = (mnode_type *) malloc ( sizeof (mnode_type));
+
+
+    mnode_start(mnode,log_out);
 
     data_tap_start(log_out);
 
-    mnode_tap_add("count", DT_INT32, &count);
+    mnode_tap_add(mnode,"count", DT_INT32, &count);
 }
 /* End of monitor_start */
 
@@ -221,7 +230,7 @@ void monitor_stop( void )
 {
     log_out(MODULE_NAME "Stop\n");
 
-    mnode_stop();
+    mnode_stop(mnode);
 
     fclose(log_file);
 
