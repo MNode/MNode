@@ -36,66 +36,6 @@
 #include "network.h"
 
 
-/* Add node to list */
-int network_add_node( network_type *n, unsigned int tx_node_id )
-{
-    node_entry *tmp = n->node_list;
-
-    // See if node is already in list 
-
-    while (tmp)
-    {
-        if (tmp->node_id == tx_node_id)
-            return MN_FAIL;
-    
-        tmp = tmp-> next;
-    }
-
-    // Insert node
-    tmp = (node_entry*) malloc(sizeof(node_entry));
-
-    tmp->next = n->node_list;
-    tmp->node_id = tx_node_id;
-    n->node_list = tmp;
-    
-    return MN_SUCCESS;
-}
-/* End of network_add_node */
-
-
-/* Display node list */
-void network_list_nodes( network_type *n )
-{
-    node_entry *tmp = n->node_list;
-    
-    n->text_out("Node | Status\n");
-    
-    while(tmp)
-    {
-        n->text_out(" [%d]    ---- \n", tmp->node_id);
-        tmp = tmp->next;
-    }
-    
-    n->text_out("\n");
-}
-/* End of network_list_nodes */
-
-
-/* Free nodes list */
-void network_free_nodes ( network_type *n )
-{
-    node_entry *tmp = n->node_list;
-    
-    while(n->node_list)
-    {
-        tmp = n->node_list->next;
-        free (n->node_list);
-        n->node_list = tmp;
-        
-    }
-}
-/* End of network free nodes */
-
 
 /* Compute checksum of packet */
 unsigned int get_checksum ( unsigned char *buff, unsigned int len )
@@ -207,11 +147,11 @@ void network_datatap_poll ( network_type *n )
 
 /* Send IDENT packet */
 void network_packet ( network_type *n, 
-                         unsigned char packet_type, 
-                         unsigned char *data,
-                         unsigned int data_length )
+                      unsigned char packet_type, 
+                      unsigned char *data,
+                      unsigned int data_length )
 {
-  unsigned char buffer[100];
+    unsigned char buffer[1000];
 
     unsigned int length = TX_DATA_OFS + data_length;
 
@@ -298,7 +238,7 @@ int network_send ( network_type *n, unsigned char *data, unsigned int length )
 
 
 /* Core network thread */
-void *network_thread (  void *threadid )
+void *network_thread ( void *threadid )
 {
     unsigned char  buf[BUFLEN];
 
@@ -389,7 +329,7 @@ void *network_thread (  void *threadid )
 
 
 /* Init the network */
-int network_init( network_type *n )
+int network_init ( network_type *n )
 {
 
     // load node id
@@ -455,13 +395,12 @@ fcntl(sock, F_SETFL, flags);*/
 }
 /* End of network_init */
 
-int network_start( network_type *n, mnode_type *m )
+int network_start ( network_type *n, mnode_type *m )
 {
     // Init values
     n->node_id = 0;
     n->mesh_packet= NULL;
     n->running = 0;
-    n->node_list = NULL;
 
     n->mnode = m;           // link to parent mnode
 
@@ -507,7 +446,7 @@ void network_stop ( network_type *n )
   
     close(n->server_sd);
     
-    network_free_nodes(n);
+
     
     n->text_out(MODULE_NAME "Stop - end\n");    
 }

@@ -2,8 +2,7 @@
     Mesh Protocol Test 
         (C) 2012 
             Jason Hunt (nulluser@gmail.com)
-            Ling
-               
+            Robin Stamer (genoce@gmail.com)
     
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
@@ -20,16 +19,13 @@
     Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
     Contact:    nulluser@gmail.com
-                Ling
+                genoce@gmail.com
 
     File: mnode.h
 */
 
-
 #ifndef MNODE_H
 #define MNODE_H
-
-
 
 #include "types.h"
 #include "datatap.h"
@@ -42,8 +38,6 @@
 #define STATE_LENGTH    1
 #define STATE_DATA      2
 
-//typedef struct network_type network_type;
-//typedef struct mnode_type mnode_type;
 
 struct mnode_type
 {
@@ -51,28 +45,31 @@ struct mnode_type
     unsigned int local_freeram;
     unsigned int local_procs;
 
-    void (*text_out)(char * format, ...);
+    void (*text_out) ( char * format, ... );
     
-    void (*mesh_packet)(mnode_type *, unsigned char *, unsigned int);
-    void (*mesh_update)(mnode_type *);
+    void (*mesh_packet) ( mnode_type *, unsigned char *, unsigned int );
+    void (*mesh_update) ( mnode_type * );
+    
+    node_entry *node_list; // Node list    
     
     
-   network_type * network;         // All Network Data
-
-
+    datatap_type *data_taps;
+    
+    network_type * network;         // All Network Data
 };
 
 
-int mnode_start(mnode_type *m, void (*out_func)(char * format, ...));
-int mnode_stop(mnode_type *m);
+int mnode_start ( mnode_type *m, void (*out_func)(char * format, ...) );
+int mnode_stop ( mnode_type *m );
 
-int mnode_tap_add(mnode_type *m, char *name, unsigned int tap_type, void * tap_link);
+int mnode_tap_add ( mnode_type *m, char *name, unsigned int tap_type, void * tap_link );
 
 void mnode_ident ( mnode_type *m );
-void mnode_string (mnode_type *m,  unsigned char *s );
-void mnode_list_nodes( mnode_type *m );
-void mnode_datatap_poll(mnode_type *m );
+void mnode_string ( mnode_type *m,  unsigned char *s );
+void mnode_list_nodes ( mnode_type *m );
+void mnode_datatap_poll (mnode_type *m );
 
+int mnode_add_node ( mnode_type *m, unsigned int tx_node_id );
 
 
 #endif

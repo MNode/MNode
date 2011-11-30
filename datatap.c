@@ -20,31 +20,27 @@
 
     Contact:    nulluser@gmail.com
                 genoce@gmail.com
-
+                
     File: datatap.c
 */
+
+#define MODULE_NAME "[Datatap] "
 
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
 
-
-
 #include "datatap.h"
 
 
-datatap_type *data_taps = NULL;
-
-static void (*text_out)(char * format, ...) = NULL;
-
-
-void data_tap_start(     void (*out_func)(char * format, ...) )
+void data_tap_start(   )
 {
-    text_out = out_func;
+  //  text_out = out_func;
 }
 
 
-void data_tap_add(char *name, unsigned int tap_type, void * tap_link)
+
+void data_tap_add ( mnode_type *m, char *name, unsigned int tap_type, void * tap_link )
 {
     datatap_type *tmp = (datatap_type *)malloc(sizeof(datatap_type));
 
@@ -54,16 +50,13 @@ void data_tap_add(char *name, unsigned int tap_type, void * tap_link)
 
     tmp->tap_link = tap_link;
 
-    tmp->next = data_taps;
+    tmp->next = m->data_taps;
     
-    data_taps = tmp;
-    
-//    network_datatap_data (&t1);
-   
+    m->data_taps = tmp;
 }
-//extern network_type *network;
 
-void data_tap_send(network_type *n, datatap_type *dt )
+
+void data_tap_send ( network_type *n, datatap_type *dt )
 {
     unsigned char buffer[100];
   
@@ -105,26 +98,15 @@ void data_tap_send(network_type *n, datatap_type *dt )
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
 /* Respond to poll request */
-void datatap_poll( network_type *n )
+void datatap_poll ( mnode_type *m, network_type *n )
 {
-    datatap_type *tmp = data_taps;
+    datatap_type *tmp = m->data_taps;
 
     // Iterate through taps and send to network
     while(tmp)
     {
-        data_tap_send(n, tmp);
+        data_tap_send (n, tmp);
 
 //        network_datatap_data (n,tmp);
         tmp = tmp->next;
@@ -136,17 +118,17 @@ void datatap_poll( network_type *n )
 
 
 /* Return a word from inside a buffer */
-unsigned int get_int8(unsigned char * b)
+unsigned int get_int8 ( unsigned char * b )
 {
     return *(b);
 }
 
-unsigned int get_int16(unsigned char * b)
+unsigned int get_int16 ( unsigned char * b )
 {
     return (*b << 8) + *(b+1);
 }
 
-unsigned int get_int32(unsigned char * b)
+unsigned int get_int32 ( unsigned char * b )
 {
     return (*(b+0) << 24) + (*(b+1)<<16)  +(*(b+2) << 8) + *(b+3);
 }
@@ -156,9 +138,11 @@ unsigned int get_int32(unsigned char * b)
 
 
 /* Got data from other node */
-void datatap_data( unsigned int node_id, 
-                   unsigned char *data,  
-                   unsigned int length )
+void datatap_data(  mnode_type *m,
+                    unsigned int node_id, 
+                    unsigned char *data,  
+                    unsigned int length )
+
 {
     unsigned int tap_type = data[0];
  //   int i;
@@ -167,20 +151,20 @@ void datatap_data( unsigned int node_id,
    
 //    printf("\nNode | Tap                            | Type   | Len  |            Value\n");
    
-   text_out("[Node %4d]", node_id);
+   m->text_out("[Node %4d]", node_id);
    
 //   for (i = 0; i < 32; i++)
-   text_out("[%30s]", data+1);
+   m->text_out("[%30s]", data+1);
       
         
     if (tap_type == DT_INT8)
-        text_out("[INT8 ][%16d]\n",   get_int8(data+1+32));
+        m->text_out("[INT8 ][%16d]\n",   get_int8(data+1+32));
         
     if (tap_type == DT_INT16)
-        text_out("[INT16 ][%16d]\n",   get_int16(data+1+32));
+        m->text_out("[INT16 ][%16d]\n",   get_int16(data+1+32));
                 
     if (tap_type == DT_INT32)
-        text_out("[INT32 ][%16d]\n",   get_int32(data+1+32));
+        m->text_out("[INT32 ][%16d]\n",   get_int32(data+1+32));
                      
         
 }

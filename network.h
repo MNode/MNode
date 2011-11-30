@@ -27,15 +27,12 @@
 #ifndef NETWORK_H
 #define NETWORK_H
 
-
 #include <pthread.h>
 #include <arpa/inet.h>
-
 
 #include "types.h"
 #include "mnode.h"
 #include "datatap.h"
-
 
 #define BUFLEN 4096 
 #define LISTEN_PORT 9998
@@ -62,10 +59,6 @@ struct node_entry
 };
 
 
-
-//typedef struct mnode_type;
-
-
 struct network_type
 {
     int server_sd;              // server socket
@@ -82,38 +75,24 @@ struct network_type
     void (*text_out)(char * format, ...);
 
     int running;
-    
-    node_entry *node_list; // Node list
-    
-    
-    mnode_type *mnode;
-    
 
+    mnode_type *mnode;
 };
 
 
-int network_init( network_type *n );
-
-int network_start( network_type *n, mnode_type *m);
-                   
-void network_stop( network_type *n);
-int network_send( network_type *n, unsigned char *data, unsigned int length);
-
-void network_ident ( network_type *n);
+int network_init ( network_type *n );
+int network_start( network_type *n, mnode_type *m );
+void network_stop( network_type *n );
+int network_send ( network_type *n, unsigned char *data, unsigned int length );
+void network_ident ( network_type *n );
 void network_string ( network_type *n, unsigned char *s );
 
-int network_add_node( network_type *n, unsigned int tx_node_id);
-void network_list_nodes( network_type *n );
-void network_free_nodes( network_type *n );
-
-void network_datatap_poll ( network_type *n);
-
-
+void network_datatap_poll ( network_type *n );
 
 void network_packet ( network_type *n, 
                          unsigned char packet_type, 
                          unsigned char *data,
-                         unsigned int data_length);
+                         unsigned int data_length );
 
 
 #endif

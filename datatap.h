@@ -24,11 +24,8 @@
     File: datatap.h
 */
 
-
-
 #ifndef DATATAP_H
 #define DATATAP_H
-
 
 #include "types.h"
 #include "mnode.h"
@@ -60,22 +57,22 @@ struct datatap_type
 /* Respond to poll request */
 
 
-void datatap_poll( network_type *n );
+void datatap_poll ( mnode_type *m, network_type *n );
 
 
 /* Got data from other node */
-void datatap_data( unsigned int node_id, 
-                   unsigned char *data,  
-                   unsigned int length );
+void datatap_data ( mnode_type *m,
+                    unsigned int node_id, 
+                    unsigned char *data,  
+                    unsigned int length );
 
 
 
-void data_tap_add(char *name,
-                 unsigned int tap_type,
-                 void * tap_link);
+
+void data_tap_add ( mnode_type *m, char *name, unsigned int tap_type, void * tap_link );
 
 
-void data_tap_start(     void (*out_func)(char * format, ...) );
+void data_tap_start ( void );
 
 
 

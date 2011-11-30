@@ -24,13 +24,24 @@
     File: monitor.h
 */
 
-
- 
- 
 #ifndef MONITOR_H
 #define MONITOR_H
  
+typedef struct monitor_type monitor_type;
 
+struct monitor_type
+{
+    int main_running;
+    int screen_x;
+    int screen_y;
+    int count ;          // Global var for datatap linking
+    
+    FILE *log_file;
+    WINDOW *log_win;
+    WINDOW *log_win_area;
+    
+    mnode_type *mnode;
+};
 
 #endif
 

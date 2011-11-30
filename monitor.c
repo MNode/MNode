@@ -21,7 +21,7 @@
     Contact:    nulluser@gmail.com
                 genoce@gmail.com
                 
-    File: MNode.c
+    File: monitor.c
 */
 
 #define MODULE_NAME "[Monitor] "
@@ -36,42 +36,34 @@
 #include "network.h"
 #include "datatap.h"
 
-int main_running;
-int screen_x;
-int screen_y;
-int count = 0;          // Global var for datatap linking
-
-FILE *log_file = NULL;
-WINDOW *log_win = NULL;
-WINDOW *log_win_area = NULL;
+#include "monitor.h"
 
 
-
-mnode_type *mnode;
+monitor_type *monitor;
 
 
 /* Create log window */
-int log_win_setup( void )
+int log_win_setup ( void )
 {
     int x_pos = 0;
     int y_pos = 1;
     
-    int x_size = screen_x;
-    int y_size = screen_y - 3;
+    int x_size = monitor->screen_x;
+    int y_size = monitor->screen_y - 3;
         
-    log_win = newwin(y_size,x_size, y_pos, x_pos);
-    box(log_win, 0 , 0);
-    wattron(log_win, COLOR_PAIR(2));
-    wbkgd(log_win,COLOR_PAIR(2));
-    wrefresh(log_win);
+    monitor->log_win = newwin(y_size,x_size, y_pos, x_pos);
+    box(monitor->log_win, 0 , 0);
+    wattron(monitor->log_win, COLOR_PAIR(2));
+    wbkgd(monitor->log_win,COLOR_PAIR(2));
+    wrefresh(monitor->log_win);
 
-    log_win_area = newwin(y_size-2, x_size-2, y_pos+1, x_pos+1);
-    wattron(log_win_area, COLOR_PAIR(2));
-    wbkgd(log_win_area,COLOR_PAIR(2));
-    idlok(log_win_area, 1);
-    scrollok(log_win_area, 1);
+    monitor->log_win_area = newwin(y_size-2, x_size-2, y_pos+1, x_pos+1);
+    wattron(monitor->log_win_area, COLOR_PAIR(2));
+    wbkgd(monitor->log_win_area,COLOR_PAIR(2));
+    idlok(monitor->log_win_area, 1);
+    scrollok(monitor->log_win_area, 1);
     
-    wrefresh(log_win_area);
+    wrefresh(monitor->log_win_area);
 
    
     return MN_SUCCESS;
@@ -80,7 +72,7 @@ int log_win_setup( void )
 
 
 /* All output is routed through this function */
-static void log_out( char *fmt, ... )
+static void log_out ( char *fmt, ... )
 {
     const unsigned int max = 1024;
     char text[max];
@@ -91,17 +83,17 @@ static void log_out( char *fmt, ... )
 
     vsnprintf(text, max, fmt, args);
 
-    wprintw(log_win_area, "%s", text);
+    wprintw(monitor->log_win_area, "%s", text);
    
-    wrefresh(log_win_area);
+    wrefresh(monitor->log_win_area);
 
     // Move curser back home
     //mvprintw(screen_y-1,0,"> ");
 
     refresh();
 
-    if (log_file != NULL)
-        fprintf(log_file, "%s\n", text);
+    if (monitor->log_file != NULL)
+        fprintf(monitor->log_file, "%s\n", text);
 
     va_end(args);
 }
@@ -109,18 +101,18 @@ static void log_out( char *fmt, ... )
 
 
 /* Menu command - exit */
-void command_exit( void )
+void command_exit ( void )
 {
-    main_running = 0;
+    monitor->main_running = 0;
 }
 /* End of command_exit */
 
 
 /* Menu command - send */
-void command_ident( void )
+void command_ident ( void )
 {
 
-    mnode_ident(mnode);
+    mnode_ident(monitor->mnode);
 
 //    network_ident();
 }
@@ -131,7 +123,7 @@ void command_ident( void )
 void command_string( char *s )
 {
 
-    mnode_string(mnode,(unsigned char *)s);
+    mnode_string(monitor->mnode,(unsigned char *)s);
 
 //    network_string((unsigned char *)s);
 
@@ -140,10 +132,10 @@ void command_string( char *s )
 
 
 /* Menu command - help */
-void command_nodes( void )
+void command_nodes ( void )
 {
 //    network_list_nodes();
-    mnode_list_nodes(mnode);
+    mnode_list_nodes(monitor->mnode);
 
 
 }
@@ -151,7 +143,7 @@ void command_nodes( void )
 
 
 /* Local data */
-void command_data( void )
+void command_data ( void )
 {
     log_out("Not implemented\n");
 }
@@ -159,11 +151,11 @@ void command_data( void )
 
 
 /* End of nodedata */
-void command_nodedata( void )
+void command_nodedata ( void )
 {
     log_out("Sending Request\n");
     
-    mnode_datatap_poll(mnode);
+    mnode_datatap_poll(monitor->mnode);
     
     
 }
@@ -171,7 +163,7 @@ void command_nodedata( void )
 
 /* Menu command - help */
 
-void command_help( void )
+void command_help ( void )
 {
     log_out("Commands\n");
     log_out("  exit          Quit program\n");
@@ -187,13 +179,28 @@ void command_help( void )
 
 
 /* Monitor startup */
-void monitor_start( void )
+void monitor_start ( void )
 {
-    log_file = fopen("log", "wt");
+    monitor = (monitor_type*) malloc(sizeof( monitor_type ));
+    
+    monitor->main_running = 0;
+    monitor->screen_x = 0;;
+    monitor->screen_y = 0;
+    monitor->count = 0;          // Global var for datatap linking
+    
+    monitor->log_file = NULL;
+    monitor->log_win = NULL;
+    monitor->log_win_area = NULL;
+    
+    monitor->mnode = NULL;
+
+
+
+    monitor->log_file = fopen("log", "wt");
 
     initscr(); /* Start curses mode */
 
-    getmaxyx(stdscr,screen_y,screen_x);
+    getmaxyx(stdscr,monitor->screen_y,monitor->screen_x);
  
     start_color();		
 
@@ -210,29 +217,28 @@ void monitor_start( void )
 
     log_out(MODULE_NAME "Start\n");
 
-    main_running = 1;
+    monitor->main_running = 1;
 
 
-    mnode = (mnode_type *) malloc ( sizeof (mnode_type));
+    monitor->mnode = (mnode_type *) malloc ( sizeof (mnode_type));
 
 
-    mnode_start(mnode,log_out);
+    mnode_start(monitor->mnode,log_out);
 
-    data_tap_start(log_out);
 
-    mnode_tap_add(mnode,"count", DT_INT32, &count);
+    mnode_tap_add(monitor->mnode,"count", DT_INT32, &monitor->count);
 }
 /* End of monitor_start */
 
 
 /* Monitor stop */
-void monitor_stop( void )
+void monitor_stop ( void )
 {
     log_out(MODULE_NAME "Stop\n");
 
-    mnode_stop(mnode);
+    mnode_stop(monitor->mnode);
 
-    fclose(log_file);
+    fclose(monitor->log_file);
 
     endwin();
 }
@@ -246,14 +252,14 @@ int main ( void )
  
     monitor_start();
    
-    while(main_running)
+    while(monitor->main_running)
     {
-        mvprintw(0,screen_x/2-8,"");
+        mvprintw(0,monitor->screen_x/2-8,"");
         
         printw("[MNode Monitor]");
         
-        mvprintw(screen_y-1,0,">                                             ");
-        mvprintw(screen_y-1,0,"> ");
+        mvprintw(monitor->screen_y-1,0,">                                             ");
+        mvprintw(monitor->screen_y-1,0,"> ");
 
         refresh();
 
@@ -285,7 +291,7 @@ int main ( void )
     
         }
 
-        count++;
+        monitor->count++;
     }
     
     monitor_stop();
@@ -293,5 +299,7 @@ int main ( void )
     return MN_SUCCESS;
  }
  /* End of main */
+ 
+ 
  
  

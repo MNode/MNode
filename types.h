@@ -27,12 +27,10 @@
 #ifndef TYPES_H
 #define TYPES_H
 
-
 typedef struct network_type network_type;
 typedef struct mnode_type mnode_type;
 typedef struct datatap_type datatap_type;
 typedef struct node_entry node_entry;
-
 
 #endif
 

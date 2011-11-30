@@ -1,4 +1,5 @@
 # Makefile includes for MNode
+# (C) 2011 Jason Hunt - nulluser@gmail.com
 # (C) 2011 Robin Stamer - genoce@gmail.com
 #
 
