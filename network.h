@@ -51,12 +51,6 @@
 
 
 
-/* Node entry */
-struct node_entry
-{
-    unsigned int node_id;
-    struct node_entry *next;
-};
 
 
 struct network_type

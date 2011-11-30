@@ -62,10 +62,21 @@ void mnode_packet ( mnode_type *m, unsigned char *data, unsigned int length )
     
     if (tx_type == ID_IDENT)
     {
-        m->text_out (MODULE_NAME "ID_IDENT\n");
+//        m->text_out (MODULE_NAME "ID_IDENT\n");
     
-        if (mnode_add_node(m, tx_src_node_id) == 0)       // Add to node list
-            m->text_out (MODULE_NAME "Node %d->%d IDENT\n", tx_src_node_id, tx_tar_node_id ); // display if new
+        
+    if (mnode_update_node(m, tx_src_node_id) == MN_FAIL)
+    {
+        mnode_add_node(m, tx_src_node_id);       // Add to node list    
+        
+    
+    }
+    
+    
+    //    if (mnode_add_node(m, tx_src_node_id) == 0)       // Add to node list
+
+
+        m->text_out (MODULE_NAME "ID_IDENT  Node %d->%d\n", tx_src_node_id, tx_tar_node_id ); // display if new
         
 
     } else
@@ -151,9 +162,8 @@ void mnode_update ( mnode_type *m )
 /* node managment */
 
 
-
-/* Add node to list */
-int mnode_add_node ( mnode_type *m, unsigned int tx_node_id )
+/* Update node data */
+int mnode_update_node ( mnode_type *m, unsigned int tx_node_id )
 {
     node_entry *tmp = m->node_list;
 
@@ -162,16 +172,44 @@ int mnode_add_node ( mnode_type *m, unsigned int tx_node_id )
     while (tmp)
     {
         if (tmp->node_id == tx_node_id)
-            return MN_FAIL;
+        {
+            tmp->last_update = time(NULL);
+            return MN_SUCCESS;
+        }
     
         tmp = tmp-> next;
     }
+
+    return MN_FAIL;
+}
+/* End of network_add_node */
+
+
+
+/* Add node to lis
+t */
+int mnode_add_node ( mnode_type *m, unsigned int tx_node_id )
+{
+    node_entry *tmp = m->node_list;
+
+  /*  // See if node is already in list 
+
+    while (tmp)
+    {
+        if (tmp->node_id == tx_node_id)
+            return MN_FAIL;
+    
+        tmp = tmp-> next;
+    }*/
 
     // Insert node
     tmp = (node_entry*) malloc(sizeof(node_entry));
 
     tmp->next = m->node_list;
     tmp->node_id = tx_node_id;
+    
+    tmp->last_update = time(NULL);
+    
     m->node_list = tmp;
     
     return MN_SUCCESS;
@@ -184,11 +222,17 @@ void mnode_list_nodes ( mnode_type *m )
 {
     node_entry *tmp = m->node_list;
     
-    m->text_out("Node | Status\n");
+    m->text_out("Node | Update\n");
     
     while(tmp)
     {
-        m->text_out(" [%d]    ---- \n", tmp->node_id);
+        time_t tim=tmp->last_update;
+
+        char *s=ctime(&tim);
+
+        s[strlen(s)-1]=0;        // remove \n
+    
+        m->text_out(" %4x  %s \n", tmp->node_id, s);
         tmp = tmp->next;
     }
     

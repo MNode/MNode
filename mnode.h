@@ -39,6 +39,17 @@
 #define STATE_DATA      2
 
 
+/* Node entry */
+struct node_entry
+{
+    unsigned int node_id;
+    struct node_entry *next;
+    
+    time_t last_update;
+};
+
+
+
 struct mnode_type
 {
     // system datataps  
@@ -70,7 +81,7 @@ void mnode_list_nodes ( mnode_type *m );
 void mnode_datatap_poll (mnode_type *m );
 
 int mnode_add_node ( mnode_type *m, unsigned int tx_node_id );
-
+int mnode_update_node ( mnode_type *m, unsigned int tx_node_id );
 
 #endif
 
